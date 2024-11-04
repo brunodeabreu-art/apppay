@@ -35,6 +35,28 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+st.markdown("""
+    <style>
+        .upload-container {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        .stFileUploader {
+            width: 400px;
+        }
+        /* Remove o texto padrão do uploader */
+        .uploadedFile {
+            display: none;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    uploaded_file = st.file_uploader("Selecione o extrato", 
+                                    type=['xlsx', 'csv'],
+                                    label_visibility="collapsed")
 
 st.markdown(
     """
