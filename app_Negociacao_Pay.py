@@ -4,37 +4,7 @@ import streamlit as st
 import plotly.express as px
 from datetime import datetime, timedelta
 
-st.set_page_config(
-    page_title="Seu App",
-    layout="wide",
-    initial_sidebar_state="collapsed"  # Mudado de "expanded" para "collapsed"
-)
-
-# Força o tema branco para todos
-st.markdown("""
-    <style>
-        /* Main container */
-        .stApp {
-            background-color: #FFFFFF;
-        }
-        
-        /* Sidebar */
-        .css-1d391kg {
-            background-color: #F0F0F0;
-        }
-        
-        /* Cards/Boxes */
-        .stMarkdown {
-            background-color: #FFFFFF;
-        }
-        
-        /* Text color */
-        .stMarkdown, .stText {
-            color: #262730;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
+st.set_page_config(page_title='AmigoPay - Assistente de Negociação', layout='wide')
 
 st.markdown(
     """
@@ -292,11 +262,17 @@ if arquivo_carregado:
             )
         st.plotly_chart(fig_box)
 else:
-    st.header("Bem-vindo ao Assistente de Negociações - AmigoPay")
-    st.write("""Essa aplicação auxilia o Vendedor na tomada de decisão sobre quais taxas ofertar ao Cliente.
-                Ela avalia extratos de maquinetas POS dos clientes e retorna as taxas sugeridas. 
-                Além disso ele traz um simulador de transações e faz algumas análises para facilitar a decisão""")
-
+    st.markdown("""
+    <div style="text-align: center; width: 100%; padding: 20px;">
+        <h1 style="color: #333; margin-bottom: 20px;">Bem-vindo ao Assistente de Negociações - AmigoPay</h1>
+        <p style="font-size: 16px; line-height: 1.6; max-width: 800px; margin: 0 auto;">
+            Essa aplicação auxilia o Vendedor na tomada de decisão sobre quais taxas ofertar ao Cliente.
+            Ela avalia extratos de maquinetas POS dos clientes e retorna as taxas sugeridas. 
+            Além disso ele traz um simulador de transações e faz algumas análises para facilitar a decisão
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.write("")
     st.write("")
     st.write("")
