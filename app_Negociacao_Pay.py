@@ -33,20 +33,20 @@ st.markdown(
 
 # Custos por modalidade
 CUSTOS = {
-    'debito': 0.99,
-    'credito_1x': 1.58,
-    'credito_2x': 1.21,
-    'credito_3x': 1.21,
-    'credito_4x': 1.21,
-    'credito_5x': 1.21,
-    'credito_6x': 1.21,
-    'credito_7x': 1.21,
-    'credito_8x': 1.21,
-    'credito_9x': 1.21,
-    'credito_10x': 1.21,
-    'credito_11x': 1.21,
-    'credito_12x': 1.21,
-    'outras' : 1.21
+    'debito': 49,
+    'credito_1x': 58,
+    'credito_2x': 31,
+    'credito_3x': 1,
+    'credito_4x': 11,
+    'credito_5x': 11,
+    'credito_6x': 11,
+    'credito_7x': 11,
+    'credito_8x': 11,
+    'credito_9x': 11,
+    'credito_10x': 11,
+    'credito_11x': 11,
+    'credito_12x': 11,
+    'outras' : 1831
     
 }
 
