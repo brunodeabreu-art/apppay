@@ -264,7 +264,7 @@ if arquivo_carregado:
 else:
     st.markdown("""
     <div style="text-align: center; width: 100%; padding: 20px;">
-        <h1 style="color: #333; margin-bottom: 20px;">Bem-vindo ao Assistente de Negociações - AmigoPay</h1>
+        <h1 style="color: #000; margin-bottom: 20px;">Bem-vindo ao Assistente de Negociações - AmigoPay</h1>
         <p style="font-size: 16px; line-height: 1.6; max-width: 800px; margin: 0 auto;">
             Essa aplicação auxilia o Vendedor na tomada de decisão sobre quais taxas ofertar ao Cliente.
             Ela avalia extratos de maquinetas POS dos clientes e retorna as taxas sugeridas. 
