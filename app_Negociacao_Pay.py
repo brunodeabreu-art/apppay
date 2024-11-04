@@ -4,7 +4,37 @@ import streamlit as st
 import plotly.express as px
 from datetime import datetime, timedelta
 
-st.set_page_config(page_title='AmigoPay - Assistente de Negociação', layout='wide')
+st.set_page_config(
+    page_title="Seu App",
+    layout="wide",
+    initial_sidebar_state="collapsed"  # Mudado de "expanded" para "collapsed"
+)
+
+# Força o tema branco para todos
+st.markdown("""
+    <style>
+        /* Main container */
+        .stApp {
+            background-color: #FFFFFF;
+        }
+        
+        /* Sidebar */
+        .css-1d391kg {
+            background-color: #F0F0F0;
+        }
+        
+        /* Cards/Boxes */
+        .stMarkdown {
+            background-color: #FFFFFF;
+        }
+        
+        /* Text color */
+        .stMarkdown, .stText {
+            color: #262730;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 
 st.markdown(
     """
