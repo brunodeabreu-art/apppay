@@ -85,7 +85,7 @@ TAXAS_SUGERIDAS = pd.DataFrame({
               2.886, 3.128, 3.146, 3.162, 3.177, 3.178, 3.184]
 })
 
-arquivo_carregado = st.sidebar.file_uploader("Carregar CSV", type=["csv"])
+arquivo_carregado = st.sidebar.file_uploader("Carregue aqui o Extrato de Transações", type=["csv"])
 
 if arquivo_carregado:
     df = process_data(load_data(arquivo_carregado))
@@ -268,7 +268,7 @@ else:
         <p style="font-size: 16px; line-height: 1.6; max-width: 800px; margin: 0 auto;">
             Essa aplicação auxilia o Vendedor na tomada de decisão sobre quais taxas ofertar ao Cliente.
             Ela avalia extratos de maquinetas POS dos clientes e retorna as taxas sugeridas. 
-            Além disso ele traz um simulador de transações e faz algumas análises para facilitar a decisão
+            Além disso, ele traz um simulador de transações e faz algumas análises para facilitar a decisão sobre margens de negociação de acordo com o perfil do cliente.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -276,7 +276,7 @@ else:
     st.markdown("""
     <div style="margin-top: 100px; text-align: center;">
         <h2 style="color: white; font-size: 20px;">
-            Adicione no painel ao lado os dados para análise
+            Navegue no painel ao para começar a analisar os dados.
         </h2>
     </div>
 """, unsafe_allow_html=True)
@@ -311,54 +311,54 @@ else:
     st.write("")
    
 
-    # # Interactive demo with sample parameters
-    # st.subheader("Simulador de Transações")
+   # Interactive demo with sample parameters
+    st.subheader("Simulador de Transações")
     
-    # # Sample parameter selection
-    # col1, col2 = st.columns(2)
-    # with col1:
-    #     demo_modalidade = st.selectbox(
-    #         'Selecione uma modalidade de exemplo:',
-    #         ['débito', 'crédito_1x', 'crédito_2x', 'crédito_3x']
-    #     )
-    #     st.markdown("""
-    #     <style>
-    #     .stSlider-range {
-    #         background-color: #0066cc !important;
-    #     }
-    #     </style>
-    #     """, unsafe_allow_html=True)
+    # Sample parameter selection
+    col1, col2 = st.columns(2)
+    with col1:
+        demo_modalidade = st.selectbox(
+            'Selecione uma modalidade de exemplo:',
+            ['débito', 'crédito_1x', 'crédito_2x', 'crédito_3x']
+        )
+        st.markdown("""
+        <style>
+        .stSlider-range {
+            background-color: #0066cc !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
-    #     demo_valor = st.slider('Valor da transação:', 100, 10000, 1000)
+        demo_valor = st.slider('Valor da transação:', 100, 10000, 1000)
     
-    # with col2:
-    #     demo_bandeira = st.selectbox(
-    #         'Selecione uma bandeira:',
-    #         ['Visa', 'Mastercard', 'Elo', 'Amex']
-    #     )
-    #     demo_mdr = st.slider('MDR (%):', 0.0, 5.0, 2.0)
+    with col2:
+        demo_bandeira = st.selectbox(
+            'Selecione uma bandeira:',
+            ['Visa', 'Mastercard', 'Elo', 'Amex']
+        )
+        demo_mdr = st.slider('MDR (%):', 0.0, 5.0, 2.0)
     
-    # # Create sample transaction
-    # if st.button('Simular Transação'):
-    #     sample_data = pd.DataFrame({
-    #         'modalidade': [demo_modalidade],
-    #         'bandeira': [demo_bandeira],
-    #         'valor': [demo_valor],
-    #         'mdr': [demo_mdr],
-    #         'data_transacao': [pd.Timestamp.now()]
-    #     })
+    # Create sample transaction
+    if st.button('Simular Transação'):
+        sample_data = pd.DataFrame({
+            'modalidade': [demo_modalidade],
+            'bandeira': [demo_bandeira],
+            'valor': [demo_valor],
+            'mdr': [demo_mdr],
+            'data_transacao': [pd.Timestamp.now()]
+        })
         
-    #     st.write("### Resultado da Simulação:")
-    #     st.dataframe(sample_data)
+        st.write("### Resultado da Simulação:")
+        st.dataframe(sample_data)
         
-    #     # Sample metrics
-    #     col1, col2, col3 = st.columns(3)
-    #     with col1:
-    #         st.metric("Valor Bruto", f"R$ {demo_valor:,.2f}")
-    #     with col2:
-    #         st.metric("Taxa MDR", f"{demo_mdr}%")
-    #     with col3:
-    #         st.metric("Valor Líquido", f"R$ {demo_valor * (1 - demo_mdr/100):,.2f}")
+        # Sample metrics
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Valor Bruto", f"R$ {demo_valor:,.2f}")
+        with col2:
+            st.metric("Taxa MDR", f"{demo_mdr}%")
+        with col3:
+            st.metric("Valor Líquido", f"R$ {demo_valor * (1 - demo_mdr/100):,.2f}")
     
     
     st.write("")
