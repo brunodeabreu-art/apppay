@@ -36,85 +36,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Primeiro o header centralizado
-st.markdown("""
-    <div style="text-align: center; width: 100%; padding: 20px;">
-        <h1 style="color: #333; margin-bottom: 20px;">Bem-vindo ao Assistente de Negociações - AmigoPay</h1>
-        <p style="font-size: 16px; line-height: 1.6; max-width: 800px; margin: 0 auto;">
-            Essa aplicação auxilia o Vendedor na tomada de decisão sobre quais taxas ofertar ao Cliente.
-            Ela avalia extratos de maquinetas POS dos clientes e retorna as taxas sugeridas. 
-            Além disso ele traz um simulador de transações e faz algumas análises para facilitar a decisão
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
 
-# Espaçamento
-st.markdown("<br>", unsafe_allow_html=True)
-
-# Estilo para o uploader
-st.markdown("""
-    <style>
-        .upload-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .stFileUploader {
-            width: 400px;
-        }
-        .stFileUploader > div {
-            background-color: white;
-            border: 1px dashed #cccccc;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .stFileUploader > div:hover {
-            border-color: #808080;
-            background-color: #fafafa;
-        }
-        /* Centraliza o conteúdo do uploader */
-        .stFileUploader > div > div {
-            text-align: center;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# Uploader centralizado
-col1, col2, col3 = st.columns([1,2,1])
-with col2:
-    uploaded_file = st.file_uploader("📄 Arraste ou selecione o arquivo", 
-                                    type=['xlsx', 'csv'],
-                                    label_visibility="collapsed")
-
-col1, col2, col3 = st.columns([1,2,1])
-with col2:
-    uploaded_file = st.file_uploader("Selecione o extrato", 
-                                    type=['xlsx', 'csv'],
-                                    label_visibility="collapsed")
-
-st.markdown(
-    """
-    <div style='
-        background-color: #0066cc; 
-        color: white; 
-        padding: 5px; 
-        border-radius: 5px; 
-        text-align: center;
-        margin-bottom: 20px;
-        animation: pulse 2s infinite;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    '>
-        <style>
-            @keyframes pulse {
-                0% { opacity: 1; }
-                50% { opacity: 0.8; }
-                100% { opacity: 1; }
-            }
-        </style>
-        <strong></strong>  
-    </div>
-    """,
-    unsafe_allow_html=True
-)
 
 # Custos por modalidade
 CUSTOS = {
@@ -357,6 +279,44 @@ else:
         </p>
     </div>
     """, unsafe_allow_html=True)
+
+# Espaçamento
+    st.markdown("<br>", unsafe_allow_html=True)
+
+# Estilo para o uploader
+    st.markdown("""
+    <style>
+        .upload-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .stFileUploader {
+            width: 400px;
+        }
+        .stFileUploader > div {
+            background-color: white;
+            border: 1px dashed #cccccc;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .stFileUploader > div:hover {
+            border-color: #808080;
+            background-color: #fafafa;
+        }
+        /* Centraliza o conteúdo do uploader */
+        .stFileUploader > div > div {
+            text-align: center;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# Uploader centralizado
+col1, col2, col3 = st.columns([1,2,1])
+with col2:
+    uploaded_file = st.file_uploader("📄 Arraste ou selecione o arquivo", 
+                                    type=['xlsx', 'csv'],
+                                    label_visibility="collapsed")
 
     st.write("")
     st.write("")
