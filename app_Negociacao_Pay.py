@@ -273,6 +273,14 @@ else:
     </div>
     """, unsafe_allow_html=True)
     
+    st.markdown("""
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h2 style="color: white; font-size: 14px; background-color: #333; padding: 10px; border-radius: 5px;">
+            Adicione os dados para análise no painel ao lado.
+        </h2>
+    </div>
+""", unsafe_allow_html=True)
+    
     st.write("")
     st.write("")
     st.write("")
