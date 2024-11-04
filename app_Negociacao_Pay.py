@@ -270,7 +270,7 @@ if arquivo_carregado:
         st.plotly_chart(fig_box)
 else:
     # Header principal
-st.markdown("""
+    st.markdown("""
     <div style="text-align: center; width: 100%; padding: 20px;">
         <h1 style="color: #333; margin-bottom: 20px;">Bem-vindo ao Assistente de Negociações - AmigoPay</h1>
         <p style="font-size: 16px; line-height: 1.6; max-width: 800px; margin: 0 auto;">
@@ -282,17 +282,17 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # Espaçamento maior
-st.markdown("<div style='margin: 80px 0;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='margin: 80px 0;'></div>", unsafe_allow_html=True)
 
 # Subheader centralizado
-st.markdown("""
+    st.markdown("""
     <div style="text-align: center; margin-bottom: 40px;">
         <h2 style="color: #666; font-size: 20px;">Faça o upload do seu extrato para começar a análise</h2>
     </div>
 """, unsafe_allow_html=True)
 
 # Estilo atualizado para o uploader
-st.markdown("""
+    st.markdown("""
     <style>
         .upload-container {
             display: flex;
