@@ -276,7 +276,7 @@ else:
     st.markdown("""
     <div style="margin-top: 100px; text-align: center;">
         <h2 style="color: white; font-size: 24px;">
-            Faça upload no painel ao lado e comece agora.
+            Faça upload no painel ao lado e comece agora mesmo.
         </h2>
     </div>
 """, unsafe_allow_html=True)
@@ -312,7 +312,7 @@ else:
    
 
    # Interactive demo with sample parameters
-    st.subheader("Playground Amigo Pay")
+    st.subheader("Playground - Amigo Pay")
     
     # Sample parameter selection
     col1, col2 = st.columns(2)
