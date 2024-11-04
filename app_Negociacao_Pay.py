@@ -266,17 +266,17 @@ else:
     <div style="text-align: center; width: 100%; padding: 20px;">
         <h1 style="color: #FFFFF; margin-bottom: 20px;">Bem-vindo ao Assistente de Negociações - AmigoPay</h1>
         <p style="font-size: 16px; line-height: 1.6; max-width: 800px; margin: 0 auto;">
-            Essa aplicação auxilia o Vendedor na tomada de decisão sobre quais taxas ofertar ao Cliente.
-            Ela avalia extratos de maquinetas POS dos clientes e retorna as taxas sugeridas. 
-            Além disso, ele traz um simulador de transações e faz algumas análises para facilitar a decisão sobre margens de negociação de acordo com o perfil do cliente.
+            Essa aplicação auxilia vendedor na tomada de decisão sobre quais taxas ofertar ao Cliente.
+            Ela avalia extratos de maquinetas POS dos clientes e retorna as taxas ótimas sugeridas. 
+            Além disso, ele traz um playground para simulações de cenários e faz análises sobre margens de negociação de acordo com o perfil do cliente.
         </p>
     </div>
     """, unsafe_allow_html=True)
     
     st.markdown("""
     <div style="margin-top: 100px; text-align: center;">
-        <h2 style="color: white; font-size: 20px;">
-            Navegue no painel ao para começar a analisar os dados.
+        <h2 style="color: white; font-size: 24px;">
+            Faça upload no painel ao lado e comece agora.
         </h2>
     </div>
 """, unsafe_allow_html=True)
@@ -312,7 +312,7 @@ else:
    
 
    # Interactive demo with sample parameters
-    st.subheader("Simulador de Transações")
+    st.subheader("Playground Amigo Pay")
     
     # Sample parameter selection
     col1, col2 = st.columns(2)
