@@ -269,7 +269,8 @@ if arquivo_carregado:
             )
         st.plotly_chart(fig_box)
 else:
-    st.markdown("""
+    # Header principal
+st.markdown("""
     <div style="text-align: center; width: 100%; padding: 20px;">
         <h1 style="color: #333; margin-bottom: 20px;">Bem-vindo ao Assistente de Negociações - AmigoPay</h1>
         <p style="font-size: 16px; line-height: 1.6; max-width: 800px; margin: 0 auto;">
@@ -280,11 +281,18 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-# Espaçamento
-    st.markdown("<br>", unsafe_allow_html=True)
+# Espaçamento maior
+st.markdown("<div style='margin: 80px 0;'></div>", unsafe_allow_html=True)
 
-# Estilo para o uploader
-    st.markdown("""
+# Subheader centralizado
+st.markdown("""
+    <div style="text-align: center; margin-bottom: 40px;">
+        <h2 style="color: #666; font-size: 20px;">Faça o upload do seu extrato para começar a análise</h2>
+    </div>
+""", unsafe_allow_html=True)
+
+# Estilo atualizado para o uploader
+st.markdown("""
     <style>
         .upload-container {
             display: flex;
@@ -294,18 +302,27 @@ else:
         .stFileUploader {
             width: 400px;
         }
+        /* Força o fundo branco */
         .stFileUploader > div {
-            background-color: white;
+            background-color: #ffffff !important;
             border: 1px dashed #cccccc;
             padding: 20px;
             border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .stFileUploader > div:hover {
             border-color: #808080;
-            background-color: #fafafa;
+            background-color: #ffffff !important;
         }
-        /* Centraliza o conteúdo do uploader */
         .stFileUploader > div > div {
+            text-align: center;
+        }
+        /* Remove qualquer cor de fundo indesejada */
+        .stFileUploader label {
+            background: none !important;
+        }
+        /* Garante texto centralizado */
+        .uploadedFile {
             text-align: center;
         }
     </style>
