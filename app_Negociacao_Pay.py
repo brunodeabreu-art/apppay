@@ -83,7 +83,7 @@ col1, col2, col3 = st.columns([1,2,1])
 with col2:
     uploaded_file = st.file_uploader("📄 Arraste ou selecione o arquivo", 
                                     type=['xlsx', 'csv'],
-                                    label_visibility="collapsed"))
+                                    label_visibility="collapsed")
 
 col1, col2, col3 = st.columns([1,2,1])
 with col2:
