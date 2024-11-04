@@ -30,53 +30,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-if 'show_upload' not in st.session_state:
-    st.session_state.show_upload = False
-
-# Custom style for the button
-st.markdown("""
-    <style>
-        div.stButton > button:first-child {
-            background-color: #0066FF;
-            color: white;
-            padding: 12px 24px;
-            border-radius: 5px;
-            border: none;
-            font-family: 'Inter', sans-serif;
-            font-size: 16px;
-            width: 200px;
-            margin: 0 auto;
-            display: block;
-        }
-        div.stButton > button:hover {
-            background-color: #0052CC;
-            color: white;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# Centered container for the button
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    if st.button("Upload Arquivo"):
-        st.session_state.show_upload = not st.session_state.show_upload
-
-# Show file uploader when button is clicked
-if st.session_state.show_upload:
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        arquivo_carregado = st.file_uploader("Carregar CSV", type=["csv"])
-        if arquivo_carregado is not None:
-            st.success("Arquivo carregado com sucesso!")
-
-# Subheader with spacing
-st.markdown("""
-    <div style="text-align: center; margin-bottom: 20px;">
-        <h2 style="color: black; font-size: 24px; font-family: 'Inter', sans-serif;">
-            Carregue o extrato e comece suas analises agora!
-        </h2>
-    </div>
-""", unsafe_allow_html=True)
 
 # Custos por modalidade
 CUSTOS = {
