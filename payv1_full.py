@@ -301,14 +301,15 @@ else:
     st.write("")
     st.write("")
     st.write("")
-    st.write("")
-    st.write("")
-    st.write("")
-    st.write("")
-    st.write("")
-    st.write("")
-    st.write("")
-    st.write("")
+  t.markdown("### Matriz de Correlação")
+correlation_data = df[['TaxaMediaPonderada', 'VolumeMediaMensal', 'TicketMedio', 'NumeroOperacoes']].corr()
+fig_corr = px.imshow(
+    correlation_data,
+    title='Matriz de Correlação',
+    labels=dict(color="Correlação"),
+    color_continuous_scale='RdBu'
+)
+st.plotly_chart(fig_corr, use_container_width=True)
    
 
    # Interactive demo with sample parameters
@@ -365,6 +366,15 @@ else:
     st.write("")
     st.write("")
     st.write("")
+    st.write("")
+    st.write("")
+    st.write("")
+    st.write("")
+    st.write("")
+    st.write("")
+    st.write("")
+    st.write("")
+    
 
 import streamlit as st
 import pandas as pd
