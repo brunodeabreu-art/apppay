@@ -527,16 +527,7 @@ fig_scatter.add_hline(
 )
 st.plotly_chart(fig_scatter, use_container_width=True)
 
-# Correlation Heatmap
-st.markdown("### Matriz de Correlação")
-correlation_data = df[['TaxaMediaPonderada', 'VolumeMediaMensal', 'TicketMedio', 'NumeroOperacoes']].corr()
-fig_corr = px.imshow(
-    correlation_data,
-    title='Matriz de Correlação',
-    labels=dict(color="Correlação"),
-    color_continuous_scale='RdBu'
-)
-st.plotly_chart(fig_corr, use_container_width=True)
+# Correlation Heatma
 
 # Volume Analysis by Category
 st.markdown("### Análise de Volume")
