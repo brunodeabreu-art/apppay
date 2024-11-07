@@ -391,8 +391,17 @@ fig_pot = px.bar(
     x='BandaCliente',
     y='VolumeMediaMensal',
     title=f'Volume Mensal Potencial por Categoria (Taxa > {target_rate:.1%}, Conversão: {conversion_rate:.1%})',
-    labels={'BandaCliente': 'Banda do Cliente', 'VolumeMediaMensal': 'Volume Potencial (R$)'},
-    **layout_config
+    labels={'BandaCliente': 'Banda do Cliente', 'VolumeMediaMensal': 'Volume Potencial (R$)'}
+)
+
+# Aplicar configurações de tema escuro
+fig_pot.update_layout(
+    plot_bgcolor='#0E1117',
+    paper_bgcolor='#0E1117',
+    font={'color': '#FAFAFA'},
+    xaxis={'gridcolor': '#262730', 'color': '#FAFAFA'},
+    yaxis={'gridcolor': '#262730', 'color': '#FAFAFA'},
+    legend={'font': {'color': '#FAFAFA'}}
 )
 
 st.plotly_chart(fig_pot, use_container_width=True)
