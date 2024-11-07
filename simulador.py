@@ -1856,5 +1856,53 @@ with col2:
         )
     )
 
+# Realizar teste de normalidade Shapiro-Wilk
+st.markdown("### Teste de Normalidade")
+col1, col2 = st.columns(2)
+
+with col1:
+    # Teste para Taxa Média Ponderada
+    _, p_value_taxa = stats.shapiro(df_filtered['TaxaMediaPonderada'])
+    st.metric(
+        "P-value Taxa Média",
+        f"{p_value_taxa:.4f}",
+        help="Valor p do teste Shapiro-Wilk para Taxa Média Ponderada"
+    )
+    st.markdown(
+        f"**Interpretação Taxa:** {'Normal' if p_value_taxa > 0.05 else 'Não Normal'} "
+        f"(α = 0.05)"
+    )
+
+with col2:
+    # Teste para Volume Médio Mensal
+    _, p_value_volume = stats.shapiro(df_filtered['VolumeMediaMensal'])
+    st.metric(
+        "P-value Volume",
+        f"{p_value_volume:.4f}",
+        help="Valor p do teste Shapiro-Wilk para Volume Médio Mensal"
+    )
+    st.markdown(
+        f"**Interpretação Volume:** {'Normal' if p_value_volume > 0.05 else 'Não Normal'} "
+        f"(α = 0.05)"
+    )
+
+# Adicionar informações sobre os parâmetros utilizados
+st.markdown("""
+    <div style='background-color: #262730; padding: 1rem; border-radius: 8px; margin-top: 1rem;'>
+        <p style='color: #FAFAFA; margin: 0;'>
+            <strong>Parâmetros da Análise:</strong><br>
+            • Banda: {}<br>
+            • Outliers Volume: {}<br>
+            • Outliers Taxa: {}<br>
+            • Tamanho da Amostra: {:,} registros
+        </p>
+    </div>
+""".format(
+    banda_selecionada,
+    "Removidos" if remove_outliers_volume else "Mantidos",
+    "Removidos" if remove_outliers_taxa else "Mantidos",
+    len(df_filtered)
+), unsafe_allow_html=True)
+
 
 
