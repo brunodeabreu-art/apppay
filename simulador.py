@@ -1332,11 +1332,10 @@ col1, col2 = st.columns(2)
 with col1:
     # Botão de download da análise
     st.download_button(
-        label="📥 Download da Análise Completa",
-        data=csv_conversao,
+        label="Download da Análise Completa",
+        data=analysis_df.to_csv().encode('utf-8'),
         file_name='analise_completa.csv',
-        mime='text/csv',
-        key='download_completo'
+        mime='text/csv'
     )
 
 with col2:
@@ -1742,20 +1741,48 @@ with tab_metas:
 # Download dos dados
 col1, col2 = st.columns(2)
 with col1:
-    csv_simulacao = simulacao_df.to_csv(index=False).encode('utf-8')
+    # Botão de download da análise
     st.download_button(
-        label="📥 Download Simulação de Cenários",
-        data=csv_simulacao,
+        label="Download da Análise Completa",
+        data=analysis_df.to_csv().encode('utf-8'),
+        file_name='analise_completa.csv',
+        mime='text/csv'
+    )
+
+with col2:
+    # Documentação e metodologia
+    st.info("""
+    **Metodologia**
+    - Taxa de conversão aplicada: {:.1%}
+    - Taxa alvo definida: {:.1%}
+    - Período de análise: Mensal
+    """.format(conversion_rate, target_rate))
+
+# Seção Otimizada de Análise de Abertura de Mercado
+st.markdown("""
+    <div style='background-color: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 2rem 0;'>
+        <h2 style='color: #2E4057; margin-bottom: 1rem;'>Simulador de Expansão de Mercado</h2>
+        <p style='color: #666; font-size: 1.1rem;'>
+            Ferramenta avançada para simulação de cenários de expansão, projeções e análise de metas.
+        </p>
+    </div>
+""", unsafe_allow_html=True)
+
+# Download dos dados de simulação
+col1, col2 = st.columns(2)
+with col1:
+    st.download_button(
+        label="Download Simulação de Cenários",
+        data=simulacao_df.to_csv(index=False).encode('utf-8'),
         file_name='simulacao_cenarios.csv',
         mime='text/csv',
         key='download_simulacao'
     )
 
 with col2:
-    csv_projecao = projecao.to_csv(index=False).encode('utf-8')
     st.download_button(
-        label="📥 Download Projeção Temporal",
-        data=csv_projecao,
+        label="Download Projeção Temporal",
+        data=projecao.to_csv(index=False).encode('utf-8'),
         file_name='projecao_temporal.csv',
         mime='text/csv',
         key='download_projecao_temporal'
