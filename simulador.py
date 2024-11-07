@@ -29,9 +29,14 @@ st.set_page_config(
     page_icon="📊",
 )
 
-# Aplicar tema claro
+# Aplicar tema claro com regras CSS adicionais
 st.markdown("""
     <style>
+        /* Reset geral para fundo branco */
+        .stApp {
+            background-color: white;
+        }
+        
         /* Tema claro */
         :root {
             --primary-color: #ff4b4b;
@@ -43,23 +48,33 @@ st.markdown("""
 
         /* Fundo branco para o corpo principal */
         .main {
-            background-color: white;
+            background-color: white !important;
         }
 
         /* Fundo branco para a sidebar */
         .css-1d391kg {
-            background-color: white;
+            background-color: white !important;
+        }
+        
+        [data-testid="stSidebar"] {
+            background-color: white !important;
+        }
+        
+        /* Remover gradiente de fundo */
+        section[data-testid="stSidebarContent"] {
+            background-image: none !important;
+            background-color: white !important;
         }
 
         /* Ajuste de cores para widgets */
         .stSlider, .stSelectbox, .stMultiSelect {
-            background-color: white;
+            background-color: white !important;
         }
 
         /* Cores para cards e containers */
         div[data-testid="stMetricValue"] {
-            background-color: white;
-            color: #31333F;
+            background-color: white !important;
+            color: #31333F !important;
         }
 
         .metric-card {
@@ -69,7 +84,20 @@ st.markdown("""
 
         /* Ajuste de cores para gráficos */
         .js-plotly-plot {
-            background-color: white;
+            background-color: white !important;
+        }
+        
+        /* Remover gradientes e backgrounds adicionais */
+        .stApp > header {
+            background-color: transparent !important;
+        }
+        
+        .stApp > div:first-child {
+            background-color: white !important;
+        }
+        
+        iframe {
+            background-color: white !important;
         }
     </style>
 """, unsafe_allow_html=True)
