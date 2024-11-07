@@ -458,7 +458,103 @@ fig_pot = px.bar(
     title=f'Volume Mensal Potencial por Categoria (Taxa > {target_rate:.1%}, Conversão: {conversion_rate:.1%})',
     labels={'BandaCliente': 'Banda do Cliente', 'VolumeMediaMensal': 'Volume Potencial (R$)'}
 )
+# Sugestão: Usar SessionState para persistir dados entre interações
+if 'df' not in st.session_state:
+    st.session_state.df = None
 
+# Adicionar métricas de conversão
+st.markdown("### Análise de Conversão")
+
+# Calcular métricas de conversão
+df_filtered['VolumeConvertido'] = df_filtered['VolumeMediaMensal'] * conversion_rate
+total_volume_original = df_filtered['VolumeMediaMensal'].sum()
+total_volume_convertido = df_filtered['VolumeConvertido'].sum()
+
+# Métricas principais de conversão
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric(
+        "Volume Total Original",
+        f"R$ {total_volume_original:,.2f}",
+        help="Volume mensal total antes da taxa de conversão"
+    )
+
+with col2:
+    st.metric(
+        "Volume Total Convertido",
+        f"R$ {total_volume_convertido:,.2f}",
+        delta=f"{conversion_rate:.1%}",
+        help="Volume mensal total após aplicar a taxa de conversão"
+    )
+
+with col3:
+    projecao_anual = total_volume_convertido * 12
+    st.metric(
+        "Projeção Anual",
+        f"R$ {projecao_anual:,.2f}",
+        help="Projeção do volume convertido para 12 meses"
+    )
+
+# Análise por banda
+st.markdown("#### Análise de Conversão por Banda")
+
+conversao_banda = df_filtered.groupby('BandaCliente').agg({
+    'VolumeMediaMensal': 'sum',
+    'VolumeConvertido': 'sum',
+    'BandaCliente': 'count'
+}).rename(columns={'BandaCliente': 'Quantidade'})
+
+conversao_banda['PercentualConversao'] = conversion_rate
+conversao_banda['DiferencaVolume'] = conversao_banda['VolumeConvertido'] - conversao_banda['VolumeMediaMensal']
+
+# Visualização da conversão por banda
+fig_conversao = go.Figure()
+
+fig_conversao.add_trace(go.Bar(
+    name='Volume Original',
+    x=conversao_banda.index,
+    y=conversao_banda['VolumeMediaMensal'],
+    text=conversao_banda['VolumeMediaMensal'].apply(lambda x: f'R$ {x:,.2f}'),
+    textposition='auto',
+))
+
+fig_conversao.add_trace(go.Bar(
+    name='Volume Convertido',
+    x=conversao_banda.index,
+    y=conversao_banda['VolumeConvertido'],
+    text=conversao_banda['VolumeConvertido'].apply(lambda x: f'R$ {x:,.2f}'),
+    textposition='auto',
+))
+
+fig_conversao.update_layout(
+    title=f'Comparação de Volume por Banda (Taxa de Conversão: {conversion_rate:.1%})',
+    barmode='group',
+    height=500
+)
+
+st.plotly_chart(fig_conversao, use_container_width=True)
+
+# Tabela detalhada de conversão
+st.markdown("#### Detalhamento da Conversão")
+
+conversao_detalhada = pd.DataFrame({
+    'Banda': conversao_banda.index,
+    'Volume Original': conversao_banda['VolumeMediaMensal'],
+    'Volume Convertido': conversao_banda['VolumeConvertido'],
+    'Diferença': conversao_banda['DiferencaVolume'],
+    'Quantidade Clientes': conversao_banda['Quantidade'],
+    'Taxa de Conversão': conversao_banda['PercentualConversao']
+})
+
+st.dataframe(
+    conversao_detalhada.style.format({
+        'Volume Original': 'R$ {:,.2f}',
+        'Volume Convertido': 'R$ {:,.2f}',
+        'Diferença': 'R$ {:,.2f}',
+        'Taxa de Conversão': '{:.1%}'
+    })
+)
 # Aplicar configurações de tema escuro
 fig_pot.update_layout(
     plot_bgcolor='#0E1117',
@@ -651,16 +747,6 @@ st.dataframe(
 )
 
 
-
-
-
-# Nova seção de análises avançadas (inserir antes do footer)
-st.markdown("""
-    <div style='background-color: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 2rem 0;'>
-        <h2 style='color: #2E4057; margin-bottom: 1rem;'>Análise Aprofundada de Volume e Taxa</h2>
-    </div>
-""", unsafe_allow_html=True)
-
 # 1. Estatísticas Avançadas
 st.markdown("### Métricas Estatísticas Avançadas")
 
@@ -745,25 +831,7 @@ fig_elast = px.line(
 )
 st.plotly_chart(fig_elast, use_container_width=True)
 
-# 4. Insights Estratégicos
-st.markdown("### Insights Estratégicos")
 
-taxa_media_global = df_filtered['TaxaMediaPonderada'].mean()
-vol_medio_global = df_filtered['VolumeMediaMensal'].mean()
-spread_taxa = df_filtered['TaxaMediaPonderada'].max() - df_filtered['TaxaMediaPonderada'].min()
-
-st.markdown("""
-    <div style='background-color: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;'>
-        <h4 style='color: #2E4057; margin-bottom: 1rem;'>Análise de Risco-Retorno</h4>
-        <ul style='color: #666; margin-left: 1rem;'>
-""" + f"""
-            <li>O spread total de taxas é de {spread_taxa:.2%}, indicando a amplitude de negociação</li>
-            <li>A assimetria de {taxa_stats['Assimetria']:.2f} na distribuição das taxas indica {'uma concentração em taxas mais baixas' if taxa_stats['Assimetria'] < 0 else 'uma tendência para taxas mais altas'}</li>
-            <li>O coeficiente de variação de {taxa_stats['Coef. de Variação']:.2%} nas taxas sugere {'alta' if taxa_stats['Coef. de Variação'] > 0.5 else 'moderada'} dispersão relativa</li>
-            <li>A concentração de volume nos top 10% dos clientes ({top_10_volume:.1%}) indica {'alta' if top_10_volume > 0.5 else 'moderada'} concentração de risco</li>
-        </ul>
-    </div>
-""", unsafe_allow_html=True)
 
 # 5. Mapa de Calor de Densidade
 fig_density = px.density_heatmap(
@@ -781,7 +849,7 @@ st.plotly_chart(fig_density, use_container_width=True)
 # Continua com o footer original
 # ... resto do código original ...
 
-st.markdown("## 📊 Análises Estatísticas Avançadas")
+
 
 # 1. Testes de Normalidade
 st.markdown("### 1. Testes de Normalidade")
@@ -791,13 +859,13 @@ with col1:
     st.markdown("**Volume Médio**")
     shapiro_vol = stats.shapiro(df_filtered['VolumeMediaMensal'])
     st.metric("Shapiro-Wilk p-value", f"{shapiro_vol.pvalue:.4f}")
-    st.markdown(f"{'✅ Normal' if shapiro_vol.pvalue > 0.05 else '❌ Não Normal'}")
+    st.markdown(f"{'Normal' if shapiro_vol.pvalue > 0.05 else ' Não Normal'}")
 
 with col2:
     st.markdown("**Taxa Média Ponderada**")
     shapiro_taxa = stats.shapiro(df_filtered['TaxaMediaPonderada'])
     st.metric("Shapiro-Wilk p-value", f"{shapiro_taxa.pvalue:.4f}")
-    st.markdown(f"{'✅ Normal' if shapiro_taxa.pvalue > 0.05 else '❌ Não Normal'}")
+    st.markdown(f"{'Normal' if shapiro_taxa.pvalue > 0.05 else ' Não Normal'}")
 
 # 2. Análise de Outliers Multivariada
 st.markdown("### 2. Análise de Outliers Multivariada")
@@ -829,23 +897,10 @@ fig_outliers = px.scatter(
 )
 st.plotly_chart(fig_outliers, use_container_width=True)
 
-# 3. Análise de Copula
-st.markdown("### 3. Análise de Dependência (Copula)")
 
-# Transformação para ranks uniformes
-u1 = stats.rankdata(df_filtered['VolumeMediaMensal']) / (len(df_filtered) + 1)
-u2 = stats.rankdata(df_filtered['TaxaMediaPonderada']) / (len(df_filtered) + 1)
-
-fig_copula = px.scatter(
-    x=u1, 
-    y=u2,
-    title='Copula Empírica Volume-Taxa',
-    labels={'x': 'Volume (rank)', 'y': 'Taxa (rank)'}
-)
-st.plotly_chart(fig_copula, use_container_width=True)
 
 # 4. Machine Learning Avançado
-st.markdown("## 🤖 Modelos de Machine Learning")
+st.markdown("# Modelos de Machine Learning")
 
 # Preparação dos dados
 X = df_filtered[['VolumeMediaMensal', 'TaxaMediaPonderada']]
@@ -853,7 +908,7 @@ scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
 # 1. Clustering Hierárquico
-st.markdown("### 1. Clustering Hierárquico")
+st.markdown("### Clustering Hierárquico")
 n_clusters = st.slider("Número de Clusters", 2, 8, 4)
 
 from scipy.cluster.hierarchy import dendrogram, linkage
@@ -867,20 +922,9 @@ linkage_matrix = linkage(X_scaled, method='ward')
 hc = AgglomerativeClustering(n_clusters=n_clusters)
 df_filtered['Cluster_Hierarquico'] = hc.fit_predict(X_scaled)
 
-# 2. Análise de Componentes Principais (PCA)
-st.markdown("### 2. Análise de Componentes Principais")
-
-from sklearn.decomposition import PCA
-pca = PCA()
-pca_result = pca.fit_transform(X_scaled)
-
-explained_variance = pca.explained_variance_ratio_
-st.markdown(f"**Variância Explicada:**")
-for i, var in enumerate(explained_variance):
-    st.markdown(f"PC{i+1}: {var:.2%}")
 
 # 3. Isolation Forest para Detecção de Anomalias
-st.markdown("### 3. Detecção de Anomalias (Isolation Forest)")
+st.markdown("### Detecção de Anomalias (Isolation Forest)")
 
 from sklearn.ensemble import IsolationForest
 iso_forest = IsolationForest(contamination=0.1, random_state=42)
@@ -899,7 +943,7 @@ fig_anomalies = px.scatter(
 st.plotly_chart(fig_anomalies, use_container_width=True)
 
 # 4. Análise de Tendências
-st.markdown("### 4. Análise de Tendências e Padrões")
+st.markdown("### Análise de Tendências e Padrões")
 
 # Regressão Polinomial
 from sklearn.preprocessing import PolynomialFeatures
@@ -924,7 +968,7 @@ fig_trend.update_layout(title='Análise de Tendência Volume-Taxa')
 st.plotly_chart(fig_trend, use_container_width=True)
 
 # 5. Métricas de Performance
-st.markdown("### 5. Métricas de Performance do Modelo")
+st.markdown("###  Métricas de Performance do Modelo")
 
 r2 = r2_score(y_taxa, polyreg.predict(X_vol))
 mse = mean_squared_error(y_taxa, polyreg.predict(X_vol))
@@ -937,103 +981,7 @@ with col2:
 
 # ... resto do código continua igual ...
 
-# Sugestão: Usar SessionState para persistir dados entre interações
-if 'df' not in st.session_state:
-    st.session_state.df = None
 
-# Adicionar métricas de conversão
-st.markdown("### 📊 Análise de Conversão")
-
-# Calcular métricas de conversão
-df_filtered['VolumeConvertido'] = df_filtered['VolumeMediaMensal'] * conversion_rate
-total_volume_original = df_filtered['VolumeMediaMensal'].sum()
-total_volume_convertido = df_filtered['VolumeConvertido'].sum()
-
-# Métricas principais de conversão
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.metric(
-        "Volume Total Original",
-        f"R$ {total_volume_original:,.2f}",
-        help="Volume mensal total antes da taxa de conversão"
-    )
-
-with col2:
-    st.metric(
-        "Volume Total Convertido",
-        f"R$ {total_volume_convertido:,.2f}",
-        delta=f"{conversion_rate:.1%}",
-        help="Volume mensal total após aplicar a taxa de conversão"
-    )
-
-with col3:
-    projecao_anual = total_volume_convertido * 12
-    st.metric(
-        "Projeção Anual",
-        f"R$ {projecao_anual:,.2f}",
-        help="Projeção do volume convertido para 12 meses"
-    )
-
-# Análise por banda
-st.markdown("#### Análise de Conversão por Banda")
-
-conversao_banda = df_filtered.groupby('BandaCliente').agg({
-    'VolumeMediaMensal': 'sum',
-    'VolumeConvertido': 'sum',
-    'BandaCliente': 'count'
-}).rename(columns={'BandaCliente': 'Quantidade'})
-
-conversao_banda['PercentualConversao'] = conversion_rate
-conversao_banda['DiferencaVolume'] = conversao_banda['VolumeConvertido'] - conversao_banda['VolumeMediaMensal']
-
-# Visualização da conversão por banda
-fig_conversao = go.Figure()
-
-fig_conversao.add_trace(go.Bar(
-    name='Volume Original',
-    x=conversao_banda.index,
-    y=conversao_banda['VolumeMediaMensal'],
-    text=conversao_banda['VolumeMediaMensal'].apply(lambda x: f'R$ {x:,.2f}'),
-    textposition='auto',
-))
-
-fig_conversao.add_trace(go.Bar(
-    name='Volume Convertido',
-    x=conversao_banda.index,
-    y=conversao_banda['VolumeConvertido'],
-    text=conversao_banda['VolumeConvertido'].apply(lambda x: f'R$ {x:,.2f}'),
-    textposition='auto',
-))
-
-fig_conversao.update_layout(
-    title=f'Comparação de Volume por Banda (Taxa de Conversão: {conversion_rate:.1%})',
-    barmode='group',
-    height=500
-)
-
-st.plotly_chart(fig_conversao, use_container_width=True)
-
-# Tabela detalhada de conversão
-st.markdown("#### Detalhamento da Conversão")
-
-conversao_detalhada = pd.DataFrame({
-    'Banda': conversao_banda.index,
-    'Volume Original': conversao_banda['VolumeMediaMensal'],
-    'Volume Convertido': conversao_banda['VolumeConvertido'],
-    'Diferença': conversao_banda['DiferencaVolume'],
-    'Quantidade Clientes': conversao_banda['Quantidade'],
-    'Taxa de Conversão': conversao_banda['PercentualConversao']
-})
-
-st.dataframe(
-    conversao_detalhada.style.format({
-        'Volume Original': 'R$ {:,.2f}',
-        'Volume Convertido': 'R$ {:,.2f}',
-        'Diferença': 'R$ {:,.2f}',
-        'Taxa de Conversão': '{:.1%}'
-    })
-)
 
 # Análise de sensibilidade
 st.markdown("#### 📈 Análise de Sensibilidade da Conversão")
