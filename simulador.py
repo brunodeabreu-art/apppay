@@ -99,6 +99,46 @@ st.markdown("""
         iframe {
             background-color: white !important;
         }
+        
+        /* Ajuste de cores de texto */
+        .stMarkdown, .stText, .stTitle {
+            color: #31333F !important;
+        }
+        
+        /* Ajuste de cores para headers */
+        h1, h2, h3, h4, h5, h6 {
+            color: #31333F !important;
+        }
+        
+        /* Ajuste de cores para labels */
+        label {
+            color: #31333F !important;
+        }
+        
+        /* Ajuste de cores para métricas */
+        [data-testid="stMetricLabel"] {
+            color: #31333F !important;
+        }
+        
+        /* Ajuste de cores para tooltips */
+        .tooltip {
+            color: #31333F !important;
+        }
+        
+        /* Ajuste de cores para selectbox e outros inputs */
+        .stSelectbox > div > div {
+            color: #31333F !important;
+        }
+        
+        /* Ajuste de cores para sidebar */
+        [data-testid="stSidebarNav"] {
+            color: #31333F !important;
+        }
+        
+        /* Ajuste de cores para botões */
+        .stButton > button {
+            color: #31333F !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -1673,7 +1713,7 @@ with tab_metas:
         ))
         
         fig_dist.update_layout(
-            title='Distribuição das Metas Mensais',
+            title='Distribui��ão das Metas Mensais',
             height=500
         )
         
