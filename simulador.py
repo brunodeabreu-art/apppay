@@ -331,15 +331,27 @@ fig_scatter = px.scatter(
         'TaxaMediaPonderada': 'Taxa Média Ponderada',
         'BandaCliente': 'Banda do Cliente',
         'TicketMedio': 'Ticket Médio'
-    },
-    **layout_config
+    }
 )
+
+# Aplicar configurações de tema escuro
+fig_scatter.update_layout(
+    plot_bgcolor='#0E1117',
+    paper_bgcolor='#0E1117',
+    font={'color': '#FAFAFA'},
+    xaxis={'gridcolor': '#262730', 'color': '#FAFAFA'},
+    yaxis={'gridcolor': '#262730', 'color': '#FAFAFA'},
+    legend={'font': {'color': '#FAFAFA'}}
+)
+
+# Adicionar linha da taxa alvo
 fig_scatter.add_hline(
     y=target_rate,
     line_dash="dash",
     line_color="red",
     annotation_text=f"Taxa Alvo: {target_rate:.1%}"
 )
+
 st.plotly_chart(fig_scatter, use_container_width=True)
 
 
@@ -809,7 +821,7 @@ iso_forest = IsolationForest(contamination=0.1, random_state=42)
 anomalies = iso_forest.fit_predict(X_scaled)
 df_filtered['Is_Anomaly'] = anomalies == -1
 
-# Visualiza��ão das anomalias
+# Visualizaão das anomalias
 fig_anomalies = px.scatter(
     df_filtered,
     x='VolumeMediaMensal',
