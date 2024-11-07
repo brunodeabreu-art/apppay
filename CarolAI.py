@@ -146,7 +146,7 @@ def generate_advanced_recommendations(basket_sets, transactions, unique_items, m
     try:
         # Gerar regras de associação
         frequent_itemsets = apriori(basket_sets, min_support=min_support, use_colnames=True)
-        rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=min_confidence)
+        rules = association_rules(frequent_itemsets, metric="confidence", min_threshold=min_confidence, num_itemsets=len(frequent_itemsets))
         rules = rules[rules['lift'] >= min_lift]
         
         # Adicionar métricas adicionais
