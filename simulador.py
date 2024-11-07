@@ -1165,7 +1165,7 @@ with col1:
         total_volume_convertido - total_volume_original,
         projecao_anual,
         (df_filtered['VolumeConvertido'].mean() - df_filtered['VolumeMediaMensal'].mean()
-    )))
+    ))
 with col2:
     st.info("""
     **Análise de Concentração**
@@ -1469,14 +1469,18 @@ with tab_cenarios:
     # Criar sequência de volumes personalizada
     volumes_base = np.arange(volume_min * 1e6, volume_max * 1e6 + 1, incremento * 1e6)
     
-    # DataFrame de simulação atualizado
+    # Adicionar antes da criação do simulacao_df
+    # Calcular métricas atuais
+    volume_medio_atual = df_filtered['VolumeMediaMensal'].mean()
+    taxa_media_atual = df_filtered['TaxaMediaPonderada'].mean()
+
+    # Criar DataFrame de simulação
     simulacao_df = pd.DataFrame({
         'Volume_Base': volumes_base,
         'Volume_Mensal': volumes_base * conversion_rate,
-        'Volume_Anual': volumes_base * conversion_rate * 12,
         'Clientes_Estimados': (volumes_base / volume_medio_atual).round(0),
         'Receita_Mensal': volumes_base * conversion_rate * taxa_media_atual,
-        'Receita_Anual': volumes_base * conversion_rate * taxa_media_atual * 12
+        'Receita_Anual': volumes_base * conversion_rate * taxa_media_atual * 13
     })
 
     # Visualização interativa com seletor
