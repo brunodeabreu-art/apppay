@@ -296,15 +296,26 @@ fig_box = px.box(
     x='BandaCliente',
     y='TaxaMediaPonderada',
     title='Distribuição das Taxas por Banda (Box Plot)',
-    labels={'TaxaMediaPonderada': 'Taxa Média Ponderada', 'BandaCliente': 'Banda do Cliente'},
-    **layout_config
+    labels={'TaxaMediaPonderada': 'Taxa Média Ponderada', 'BandaCliente': 'Banda do Cliente'}
 )
+
+# Aplicar configurações de tema escuro ao box plot
+fig_box.update_layout(
+    plot_bgcolor='#0E1117',
+    paper_bgcolor='#0E1117',
+    font={'color': '#FAFAFA'},
+    xaxis={'gridcolor': '#262730', 'color': '#FAFAFA'},
+    yaxis={'gridcolor': '#262730', 'color': '#FAFAFA'}
+)
+
+# Adicionar linha da taxa alvo
 fig_box.add_hline(
     y=target_rate,
     line_dash="dash",
     line_color="red",
     annotation_text=f"Taxa Alvo: {target_rate:.1%}"
 )
+
 st.plotly_chart(fig_box, use_container_width=True)
 
 # Scatter Plot: Volume vs Rate
@@ -798,7 +809,7 @@ iso_forest = IsolationForest(contamination=0.1, random_state=42)
 anomalies = iso_forest.fit_predict(X_scaled)
 df_filtered['Is_Anomaly'] = anomalies == -1
 
-# Visualização das anomalias
+# Visualiza��ão das anomalias
 fig_anomalies = px.scatter(
     df_filtered,
     x='VolumeMediaMensal',
