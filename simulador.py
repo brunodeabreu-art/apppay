@@ -191,6 +191,71 @@ with st.sidebar:
     
     st.markdown('</div>', unsafe_allow_html=True)
 
+# No sidebar, após os controles existentes e antes do st.markdown('</div>', unsafe_allow_html=True)
+
+# Adicionar uma linha divisória
+st.sidebar.markdown('---')
+
+# Botão de Reset
+if st.sidebar.button('Resetar Parâmetros', key='reset_button'):
+    # Resetar valores usando st.session_state
+    st.session_state['bandas_disponiveis'] = 'Todas'  # Reset banda
+    st.session_state['target_rate'] = 2.0  # Reset taxa alvo para 2%
+    st.session_state['conversion_rate'] = 30.0  # Reset taxa de conversão para 30%
+    st.session_state['remove_outliers_volume'] = False  # Desativar remoção de outliers volume
+    st.session_state['remove_outliers_taxa'] = False  # Desativar remoção de outliers taxa
+    st.rerun()  # Reexecutar o app com os valores resetados
+
+# Atualizar os widgets para usar session_state
+banda_selecionada = st.sidebar.selectbox(
+    "Banda do Cliente",
+    options=bandas_disponiveis,
+    index=0,
+    key='bandas_disponiveis'
+)
+
+target_rate = st.sidebar.slider(
+    "Taxa Alvo (%)",
+    min_value=0.0,
+    max_value=5.0,
+    value=st.session_state.get('target_rate', 2.0),
+    step=0.1,
+    format="%0.1f%%",
+    key='target_rate'
+) / 100
+
+conversion_rate = st.sidebar.slider(
+    "Taxa de Conversão (%)",
+    min_value=0.0,
+    max_value=100.0,
+    value=st.session_state.get('conversion_rate', 30.0),
+    step=5.0,
+    format="%0.1f%%",
+    key='conversion_rate'
+) / 100
+
+# Controles de Outliers
+st.sidebar.markdown('<div style="margin-top: 2rem;">', unsafe_allow_html=True)
+st.sidebar.markdown("### Controle de Outliers")
+
+col1, col2 = st.sidebar.columns(2)
+
+with col1:
+    remove_outliers_volume = st.checkbox(
+        "Outliers Volume",
+        value=st.session_state.get('remove_outliers_volume', False),
+        help="Remove valores extremos de volume usando método IQR",
+        key='remove_outliers_volume'
+    )
+
+with col2:
+    remove_outliers_taxa = st.checkbox(
+        "Outliers Taxa",
+        value=st.session_state.get('remove_outliers_taxa', False),
+        help="Remove valores extremos de taxa usando método IQR",
+        key='remove_outliers_taxa'
+    )
+
 # Aplicar filtros aos dados
 if banda_selecionada != 'Todas':
     df_filtered = df[df['BandaCliente'] == banda_selecionada].copy()
@@ -442,7 +507,7 @@ st.download_button(
     data=analysis_df.to_csv().encode('utf-8'),
     file_name='analise_completa.csv',
     mime='text/csv',
-    key='download_analise_2'
+    key='download_analise_1'
 )
 
 # Após as métricas de conversão existentes, adicionar nova seção
@@ -1216,7 +1281,7 @@ with tabs[0]:
 
 with tabs[1]:
     # (Manter análises estatísticas)
-    st.markdown("### 📊 Análise Estatística Detalhada")
+    st.markdown("### 📊 Anlise Estatística Detalhada")
     
     # Estatísticas descritivas por banda
     stats_df = df_filtered.groupby('BandaCliente').agg({
@@ -1369,7 +1434,7 @@ with col1:
         data=analysis_df.to_csv().encode('utf-8'),
         file_name='analise_completa.csv',
         mime='text/csv',
-        key='download_analise_2'
+        key='download_analise_1'
     )
 
 with col2:
@@ -1380,21 +1445,6 @@ with col2:
     - Taxa alvo definida: {:.1%}
     - Período de análise: Mensal
     """.format(conversion_rate, target_rate))
-
-# 10. NOTAS E CONSIDERAÇÕES
-st.markdown("""
-    <div style='background-color: #f8f9fa; padding: 1rem; border-radius: 8px; margin-top: 2rem;'>
-        <h4 style='color: #2E4057;'>Notas Importantes</h4>
-        <ul style='color: #666;'>
-            <li>Valores baseados em médias mensais</li>
-            <li>Projeções consideram cenário linear de conversão</li>
-            <li>Análises estatísticas excluem outliers quando aplicável</li>
-        </ul>
-    </div>
-""", unsafe_allow_html=True)
-# Calcular métricas de referência
-volume_medio_atual = df_filtered['VolumeMediaMensal'].mean()
-taxa_media_atual = df_filtered['TaxaMediaPonderada'].mean()
 
 # Seção Otimizada de Análise de Abertura de Mercado
 st.markdown("""
@@ -1781,7 +1831,7 @@ with col1:
         data=analysis_df.to_csv().encode('utf-8'),
         file_name='analise_completa.csv',
         mime='text/csv',
-        key='download_analise_2'
+        key='download_analise_1'
     )
 
 with col2:
@@ -1811,7 +1861,7 @@ with col1:
         data=simulacao_df.to_csv(index=False).encode('utf-8'),
         file_name='simulacao_cenarios.csv',
         mime='text/csv',
-        key='download_simulacao_3'
+        key='download_simulacao_2'
     )
 
 with col2:
@@ -1820,7 +1870,7 @@ with col2:
         data=projecao.to_csv(index=False).encode('utf-8'),
         file_name='projecao_temporal.csv',
         mime='text/csv',
-        key='download_projecao_4'
+        key='download_projecao_3'
     )
 
 # Seção de Análise de Crescimento
@@ -1903,6 +1953,146 @@ st.markdown("""
     "Removidos" if remove_outliers_taxa else "Mantidos",
     len(df_filtered)
 ), unsafe_allow_html=True)
+
+# Seção de Clustering Hierárquico
+st.markdown("### Clustering Hierárquico")
+
+# Preparar os dados para clustering
+X = df_filtered[['VolumeMediaMensal', 'TaxaMediaPonderada']].copy()
+
+# Normalizar os dados
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Criar o dendrograma
+fig_dendrogram = go.Figure()
+
+# Calcular o linkage
+from scipy.cluster.hierarchy import dendrogram, linkage
+Z = linkage(X_scaled, method='ward')
+
+# Criar o dendrograma
+def create_dendrogram():
+    from scipy.cluster.hierarchy import dendrogram
+    
+    # Calcular o dendrograma
+    dendro = dendrogram(Z, no_plot=True)
+    
+    # Criar o gráfico
+    fig = go.Figure()
+    
+    # Adicionar as linhas do dendrograma
+    fig.add_trace(go.Scatter(
+        x=dendro['icoord'],
+        y=dendro['dcoord'],
+        mode='lines',
+        line=dict(color='#FAFAFA'),
+        hoverinfo='skip'
+    ))
+    
+    # Atualizar o layout
+    fig.update_layout(
+        title='Dendrograma do Clustering Hierárquico',
+        showlegend=False,
+        xaxis_title='Amostras',
+        yaxis_title='Distância',
+        plot_bgcolor='#0E1117',
+        paper_bgcolor='#0E1117',
+        font={'color': '#FAFAFA'},
+        xaxis={'showticklabels': False, 'gridcolor': '#262730', 'color': '#FAFAFA'},
+        yaxis={'gridcolor': '#262730', 'color': '#FAFAFA'},
+        height=500
+    )
+    
+    return fig
+
+# Exibir o dendrograma
+st.plotly_chart(create_dendrogram(), use_container_width=True)
+
+# Adicionar controle para número de clusters
+n_clusters = st.slider(
+    "Número de Clusters",
+    min_value=2,
+    max_value=10,
+    value=4,
+    step=1,
+    help="Selecione o número de clusters para análise"
+)
+
+# Realizar o clustering
+from sklearn.cluster import AgglomerativeClustering
+clustering = AgglomerativeClustering(n_clusters=n_clusters)
+df_filtered['Cluster'] = clustering.fit_predict(X_scaled)
+
+# Criar scatter plot com os clusters
+fig_clusters = px.scatter(
+    df_filtered,
+    x='VolumeMediaMensal',
+    y='TaxaMediaPonderada',
+    color='Cluster',
+    title=f'Clustering Hierárquico com {n_clusters} Clusters',
+    labels={
+        'VolumeMediaMensal': 'Volume Médio Mensal (R$)',
+        'TaxaMediaPonderada': 'Taxa Média Ponderada',
+        'Cluster': 'Cluster'
+    }
+)
+
+# Atualizar layout do scatter plot
+fig_clusters.update_layout(
+    plot_bgcolor='#0E1117',
+    paper_bgcolor='#0E1117',
+    font={'color': '#FAFAFA'},
+    xaxis={'gridcolor': '#262730', 'color': '#FAFAFA'},
+    yaxis={'gridcolor': '#262730', 'color': '#FAFAFA'},
+    legend={'font': {'color': '#FAFAFA'}}
+)
+
+# Exibir o scatter plot
+st.plotly_chart(fig_clusters, use_container_width=True)
+
+# Análise dos clusters
+cluster_analysis = df_filtered.groupby('Cluster').agg({
+    'VolumeMediaMensal': ['mean', 'count'],
+    'TaxaMediaPonderada': 'mean'
+}).round(4)
+
+cluster_analysis.columns = ['Volume Médio', 'Quantidade', 'Taxa Média']
+cluster_analysis = cluster_analysis.reset_index()
+
+# Exibir análise dos clusters
+st.markdown("#### Análise dos Clusters")
+st.dataframe(
+    cluster_analysis.style.format({
+        'Volume Médio': 'R$ {:,.2f}',
+        'Taxa Média': '{:.4%}'
+    }),
+    height=400
+)
+
+# Adicionar métricas dos clusters
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric(
+        "Cluster Mais Populoso",
+        f"Cluster {cluster_analysis.loc[cluster_analysis['Quantidade'].idxmax(), 'Cluster']}",
+        f"{cluster_analysis['Quantidade'].max()} clientes"
+    )
+
+with col2:
+    st.metric(
+        "Maior Volume Médio",
+        f"Cluster {cluster_analysis.loc[cluster_analysis['Volume Médio'].idxmax(), 'Cluster']}",
+        f"R$ {cluster_analysis['Volume Médio'].max():,.2f}"
+    )
+
+with col3:
+    st.metric(
+        "Maior Taxa Média",
+        f"Cluster {cluster_analysis.loc[cluster_analysis['Taxa Média'].idxmax(), 'Cluster']}",
+        f"{cluster_analysis['Taxa Média'].max():.2%}"
+    )
 
 
 
