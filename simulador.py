@@ -24,168 +24,52 @@ def remove_outliers(df, column):
 st.set_page_config(
     page_title="Simulador de Spread",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+    menu_items=None,
+    page_icon="📊",
 )
 
-# Estilo CSS otimizado com ajustes de UI
+# Aplicar tema claro
 st.markdown("""
     <style>
-        /* Reset completo do sidebar */
-        section[data-testid="stSidebar"] {
-            padding: 0 !important;
-            margin: 0 !important;
+        /* Tema claro */
+        :root {
+            --primary-color: #ff4b4b;
+            --background-color: white;
+            --secondary-background-color: #f0f2f6;
+            --text-color: #31333F;
+            --font: "Source Sans Pro", sans-serif;
         }
-        
-        section[data-testid="stSidebar"] > div {
-            padding: 0 !important;
-            margin: 0 !important;
+
+        /* Fundo branco para o corpo principal */
+        .main {
+            background-color: white;
         }
-        
-        /* Ajuste extremo para o container da logo */
-        .sidebar .element-container:nth-child(1) {
-            margin-top: -8rem !important;  /* Valor mais negativo */
-            margin-bottom: -2rem !important;
-            padding: 0 !important;
-            position: relative;
-            z-index: 999;
-            transform: translateY(-2rem);  /* Deslocamento adicional */
+
+        /* Fundo branco para a sidebar */
+        .css-1d391kg {
+            background-color: white;
         }
-        
-        /* Força posicionamento absoluto */
-        .sidebar .element-container:nth-child(1) > div {
-            position: absolute !important;
-            top: -2rem !important;
-            left: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
+
+        /* Ajuste de cores para widgets */
+        .stSlider, .stSelectbox, .stMultiSelect {
+            background-color: white;
         }
-        
-        /* Ajuste da imagem */
-        .sidebar img {
-            width: 240px !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            display: block;
+
+        /* Cores para cards e containers */
+        div[data-testid="stMetricValue"] {
+            background-color: white;
+            color: #31333F;
         }
-        
-        /* Ajuste do espaço após a logo */
-        .sidebar-divider {
-            margin-top: -1rem !important;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 1.5rem;
-        }
-        
-        /* Conteúdo do sidebar */
-        .sidebar-content {
-            padding-top: 0;
-            padding-left: 1rem;
-            margin-top: -1rem;
-        }
-        
-        /* Força todos os elementos para cima */
-        .sidebar > div > div > div {
-            transform: translateY(-2rem);
-        }
-        
-        /* Estilo para cards de métricas */
-        div[data-testid="metric-container"] {
-            background-color: #ffffff;
-            border: 1px solid #e1e4e8;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            margin: 0.5rem 0;
-        }
-        
-        /* Ajuste do tamanho das fontes nas métricas */
-        div[data-testid="metric-container"] label {
-            font-size: 0.875rem !important;
-            color: #4a5568 !important;
-            font-weight: 500 !important;
-        }
-        
-        div[data-testid="metric-container"] div[data-testid="metric-value"] {
-            font-size: 1.25rem !important;
-            font-weight: 600 !important;
-            color: #2d3748 !important;
-        }
-        
-        div[data-testid="metric-container"] div[data-testid="metric-delta"] {
-            font-size: 0.75rem !important;
-            color: #718096 !important;
-        }
-        
-        /* Estilo para seções */
-        .section-header {
-            font-size: 1.5rem !important;
-            font-weight: 600;
-            color: #2d3748;
-            margin: 2rem 0 1rem 0;
-        }
-        
-        .section-subheader {
-            font-size: 1rem !important;
-            color: #4a5568;
-            margin-bottom: 1.5rem;
-        }
-        
-        /* Container para métricas principais */
-        .metrics-container {
-            background-color: #f8fafc;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            border: 1px solid #e2e8f0;
-        }
-        
-        /* Grid para métricas */
-        .metrics-grid {
-            display: grid;
-            gap: 1rem;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        }
-        
-        /* Card individual de métrica */
+
         .metric-card {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            transition: transform 0.2s;
+            background-color: white !important;
+            border: 1px solid #e1e4e8 !important;
         }
-        
-        .metric-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Ajuste de tamanho para títulos de seção */
-        h1 {
-            font-size: 2rem !important;
-        }
-        
-        h2 {
-            font-size: 1.5rem !important;
-        }
-        
-        h3 {
-            font-size: 1.25rem !important;
-        }
-        
-        /* Estilo para tooltips */
-        .tooltip {
-            position: relative;
-            display: inline-block;
-            cursor: help;
-        }
-        
-        /* Ajuste para gráficos */
-        .plot-container {
-            background: white;
-            border-radius: 8px;
-            padding: 1rem;
-            border: 1px solid #e2e8f0;
-            margin: 1rem 0;
+
+        /* Ajuste de cores para gráficos */
+        .js-plotly-plot {
+            background-color: white;
         }
     </style>
 """, unsafe_allow_html=True)
