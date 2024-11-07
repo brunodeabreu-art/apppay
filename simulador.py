@@ -289,7 +289,7 @@ if remove_outliers_volume:
         st.sidebar.info(f"Removidos {outliers_volume} outliers de volume")
     tamanho_original = len(df_filtered)
 
-# Aplicar remoão de outliers de taxa se checkbox estiver marcado
+# Aplicar remoção de outliers de taxa se checkbox estiver marcado
 if remove_outliers_taxa:
     df_filtered = remove_outliers(df_filtered, 'TaxaMediaPonderada')
     outliers_taxa = tamanho_original - len(df_filtered)
@@ -451,7 +451,7 @@ st.plotly_chart(fig_pot, use_container_width=True)
 
 # Detailed Statistics
 st.markdown("### Estatísticas Detalhadas")
-analysis_df = df.groupby('BandaCliente').agg({
+analysis_df = df_filtered.groupby('BandaCliente').agg({
     'TaxaMediaPonderada': ['count', 'mean', 'min', 'max', 'std'],
     'VolumeMediaMensal': ['sum', 'mean', 'std'],
     'TicketMedio': ['mean', 'std'],
@@ -481,7 +481,7 @@ st.dataframe(
 
 # Download button
 st.download_button(
-    label="📥 Download da Análise Completa",
+    label="Download da Análise Completa",
     data=analysis_df.to_csv().encode('utf-8'),
     file_name='analise_completa.csv',
     mime='text/csv'
@@ -496,7 +496,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Análise de distribuição de volume
-st.markdown("#### 📊 Distribuição do Volume")
+st.markdown("#### Distribuição do Volume")
 help_volume = """
 Este gráfico mostra como o volume mensal está distribuído entre os clientes.
 - Concentração à direita indica maior número de clientes com volumes altos
@@ -505,7 +505,7 @@ Este gráfico mostra como o volume mensal está distribuído entre os clientes.
 st.info(help_volume)
 
 fig_vol_dist = px.histogram(
-    df,
+    df_filtered,
     x='VolumeMediaMensal',
     nbins=50,
     title='Distribuição do Volume Médio Mensal',
@@ -514,25 +514,25 @@ fig_vol_dist = px.histogram(
 st.plotly_chart(fig_vol_dist, use_container_width=True)
 
 # Análise de quartis
-st.markdown("#### 📊 Análise de Quartis")
+st.markdown("#### Análise de Quartis")
 st.info("Os quartis dividem os dados em 4 partes iguais, ajudando a entender a distribuição dos valores.")
 
 col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("**Quartis de Volume**")
-    quartis_volume = df['VolumeMediaMensal'].quantile([0.25, 0.5, 0.75])
+    quartis_volume = df_filtered['VolumeMediaMensal'].quantile([0.25, 0.5, 0.75])
     for q, v in zip(['25%', '50%', '75%'], quartis_volume):
         st.metric(f"{q} dos volumes estão abaixo de", f"R$ {v:,.2f}")
 
 with col2:
     st.markdown("**Quartis de Taxa**")
-    quartis_taxa = df['TaxaMediaPonderada'].quantile([0.25, 0.5, 0.75])
+    quartis_taxa = df_filtered['TaxaMediaPonderada'].quantile([0.25, 0.5, 0.75])
     for q, v in zip(['25%', '50%', '75%'], quartis_taxa):
         st.metric(f"{q} das taxas estão abaixo de", f"{v:.2%}")
 
 # Análise de correlação
-st.markdown("#### 📈 Correlação Volume x Taxa")
+st.markdown("#### Correlação Volume x Taxa")
 st.info("""
 A correlação indica a força da relação entre volume e taxa.
 - Valores próximos a -1: forte relação negativa (quando um aumenta, outro diminui)
@@ -540,23 +540,23 @@ A correlação indica a força da relação entre volume e taxa.
 - Valores próximos a 0: pouca ou nenhuma relação
 """)
 
-corr = df['VolumeMediaMensal'].corr(df['TaxaMediaPonderada'])
+corr = df_filtered['VolumeMediaMensal'].corr(df_filtered['TaxaMediaPonderada'])
 st.metric("Correlação", f"{corr:.2f}")
 
 # Segmentação por faixas de volume
-st.markdown("#### 📊 Análise por Faixas de Volume")
+st.markdown("#### Análise por Faixas de Volume")
 st.info("""
 Divisão dos clientes em 5 grupos de acordo com o volume mensal,
 permitindo analisar o comportamento das taxas em cada faixa.
 """)
 
-df['FaixaVolume'] = pd.qcut(
-    df['VolumeMediaMensal'],
+df_filtered['FaixaVolume'] = pd.qcut(
+    df_filtered['VolumeMediaMensal'],
     q=5,
     labels=['Muito Baixo', 'Baixo', 'Médio', 'Alto', 'Muito Alto']
 )
 
-analise_faixa = df.groupby('FaixaVolume').agg({
+analise_faixa = df_filtered.groupby('FaixaVolume').agg({
     'VolumeMediaMensal': ['mean', 'count'],
     'TaxaMediaPonderada': 'mean'
 }).round(4)
@@ -572,7 +572,7 @@ st.dataframe(
 
 # Visualização da relação Volume x Taxa por faixa
 fig_faixas = px.box(
-    df,
+    df_filtered,
     x='FaixaVolume',
     y='TaxaMediaPonderada',
     title='Distribuição das Taxas por Faixa de Volume',
@@ -584,26 +584,26 @@ fig_faixas = px.box(
 st.plotly_chart(fig_faixas, use_container_width=True)
 
 # New Machine Learning Section
-st.markdown("## 🤖 Análise Preditiva")
+st.markdown("## Análise Preditiva")
 
 # Data preparation for ML
 features_for_clustering = ['TaxaMediaPonderada', 'VolumeMediaMensal', 'TicketMedio']
-X_cluster = df[features_for_clustering].copy()
+X_cluster = df_filtered[features_for_clustering].copy()
 
 # Normalization
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X_cluster)
 
 # K-means Clustering
-st.markdown("### 📊 Segmentação de Clientes (K-means)")
+st.markdown("### Segmentação de Clientes (K-means)")
 n_clusters = st.slider("Número de Segmentos", min_value=2, max_value=8, value=4)
 
 kmeans = KMeans(n_clusters=n_clusters, random_state=42)
-df['Cluster'] = kmeans.fit_predict(X_scaled)
+df_filtered['Cluster'] = kmeans.fit_predict(X_scaled)
 
 # 3D Cluster Visualization
 fig_3d = px.scatter_3d(
-    df,
+    df_filtered,
     x='VolumeMediaMensal',
     y='TaxaMediaPonderada',
     z='TicketMedio',
@@ -620,7 +620,7 @@ st.plotly_chart(fig_3d, use_container_width=True)
 # Continuação do código anterior...
 
 # Cluster Analysis
-cluster_analysis = df.groupby('Cluster').agg({
+cluster_analysis = df_filtered.groupby('Cluster').agg({
     'TaxaMediaPonderada': ['mean', 'count'],
     'VolumeMediaMensal': 'mean',
     'TicketMedio': 'mean'
@@ -655,12 +655,12 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("#### Volume Médio Mensal")
     vol_stats = {
-        'Média': df['VolumeMediaMensal'].mean(),
-        'Mediana': df['VolumeMediaMensal'].median(),
-        'Desvio Padrão': df['VolumeMediaMensal'].std(),
-        'Coef. de Variação': df['VolumeMediaMensal'].std() / df['VolumeMediaMensal'].mean(),
-        'Assimetria': df['VolumeMediaMensal'].skew(),
-        'Curtose': df['VolumeMediaMensal'].kurtosis()
+        'Média': df_filtered['VolumeMediaMensal'].mean(),
+        'Mediana': df_filtered['VolumeMediaMensal'].median(),
+        'Desvio Padrão': df_filtered['VolumeMediaMensal'].std(),
+        'Coef. de Variação': df_filtered['VolumeMediaMensal'].std() / df_filtered['VolumeMediaMensal'].mean(),
+        'Assimetria': df_filtered['VolumeMediaMensal'].skew(),
+        'Curtose': df_filtered['VolumeMediaMensal'].kurtosis()
     }
     
     for metric, value in vol_stats.items():
@@ -674,12 +674,12 @@ with col1:
 with col2:
     st.markdown("#### Taxa Média Ponderada")
     taxa_stats = {
-        'Média': df['TaxaMediaPonderada'].mean(),
-        'Mediana': df['TaxaMediaPonderada'].median(),
-        'Desvio Padrão': df['TaxaMediaPonderada'].std(),
-        'Coef. de Variação': df['TaxaMediaPonderada'].std() / df['TaxaMediaPonderada'].mean(),
-        'Assimetria': df['TaxaMediaPonderada'].skew(),
-        'Curtose': df['TaxaMediaPonderada'].kurtosis()
+        'Média': df_filtered['TaxaMediaPonderada'].mean(),
+        'Mediana': df_filtered['TaxaMediaPonderada'].median(),
+        'Desvio Padrão': df_filtered['TaxaMediaPonderada'].std(),
+        'Coef. de Variação': df_filtered['TaxaMediaPonderada'].std() / df_filtered['TaxaMediaPonderada'].mean(),
+        'Assimetria': df_filtered['TaxaMediaPonderada'].skew(),
+        'Curtose': df_filtered['TaxaMediaPonderada'].kurtosis()
     }
     
     for metric, value in taxa_stats.items():
@@ -702,9 +702,9 @@ def gini(array):
     n = array.shape[0]
     return ((np.sum((2 * index - n - 1) * array)) / (n * np.sum(array)))
 
-gini_volume = gini(df['VolumeMediaMensal'])
-top_10_volume = df['VolumeMediaMensal'].nlargest(int(len(df)*0.1)).sum() / df['VolumeMediaMensal'].sum()
-top_20_volume = df['VolumeMediaMensal'].nlargest(int(len(df)*0.2)).sum() / df['VolumeMediaMensal'].sum()
+gini_volume = gini(df_filtered['VolumeMediaMensal'])
+top_10_volume = df_filtered['VolumeMediaMensal'].nlargest(int(len(df_filtered)*0.1)).sum() / df_filtered['VolumeMediaMensal'].sum()
+top_20_volume = df_filtered['VolumeMediaMensal'].nlargest(int(len(df_filtered)*0.2)).sum() / df_filtered['VolumeMediaMensal'].sum()
 
 col1, col2, col3 = st.columns(3)
 col1.metric("Índice de Gini (Volume)", f"{gini_volume:.2f}")
@@ -715,8 +715,8 @@ col3.metric("Concentração Top 20%", f"{top_20_volume:.1%}")
 st.markdown("### Análise de Elasticidade Volume-Taxa")
 
 # Análise por quartis de volume
-df['VolumeQuartil'] = pd.qcut(df['VolumeMediaMensal'], 4, labels=['Q1', 'Q2', 'Q3', 'Q4'])
-elasticidade = df.groupby('VolumeQuartil').agg({
+df_filtered['VolumeQuartil'] = pd.qcut(df_filtered['VolumeMediaMensal'], 4, labels=['Q1', 'Q2', 'Q3', 'Q4'])
+elasticidade = df_filtered.groupby('VolumeQuartil').agg({
     'VolumeMediaMensal': 'mean',
     'TaxaMediaPonderada': 'mean'
 })
@@ -734,9 +734,9 @@ st.plotly_chart(fig_elast, use_container_width=True)
 # 4. Insights Estratégicos
 st.markdown("### Insights Estratégicos")
 
-taxa_media_global = df['TaxaMediaPonderada'].mean()
-vol_medio_global = df['VolumeMediaMensal'].mean()
-spread_taxa = df['TaxaMediaPonderada'].max() - df['TaxaMediaPonderada'].min()
+taxa_media_global = df_filtered['TaxaMediaPonderada'].mean()
+vol_medio_global = df_filtered['VolumeMediaMensal'].mean()
+spread_taxa = df_filtered['TaxaMediaPonderada'].max() - df_filtered['TaxaMediaPonderada'].min()
 
 st.markdown("""
     <div style='background-color: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 1rem 0;'>
@@ -753,7 +753,7 @@ st.markdown("""
 
 # 5. Mapa de Calor de Densidade
 fig_density = px.density_heatmap(
-    df,
+    df_filtered,
     x='VolumeMediaMensal',
     y='TaxaMediaPonderada',
     title='Mapa de Densidade Volume-Taxa',
@@ -775,13 +775,13 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("**Volume Médio**")
-    shapiro_vol = stats.shapiro(df['VolumeMediaMensal'])
+    shapiro_vol = stats.shapiro(df_filtered['VolumeMediaMensal'])
     st.metric("Shapiro-Wilk p-value", f"{shapiro_vol.pvalue:.4f}")
     st.markdown(f"{'✅ Normal' if shapiro_vol.pvalue > 0.05 else '❌ Não Normal'}")
 
 with col2:
     st.markdown("**Taxa Média Ponderada**")
-    shapiro_taxa = stats.shapiro(df['TaxaMediaPonderada'])
+    shapiro_taxa = stats.shapiro(df_filtered['TaxaMediaPonderada'])
     st.metric("Shapiro-Wilk p-value", f"{shapiro_taxa.pvalue:.4f}")
     st.markdown(f"{'✅ Normal' if shapiro_taxa.pvalue > 0.05 else '❌ Não Normal'}")
 
@@ -797,16 +797,16 @@ def mahalanobis_distance(data):
     dist = np.sqrt(np.sum(np.dot(diff, inv_covariance_matrix) * diff, axis=1))
     return dist
 
-X = df[['VolumeMediaMensal', 'TaxaMediaPonderada']].values
+X = df_filtered[['VolumeMediaMensal', 'TaxaMediaPonderada']].values
 distances = mahalanobis_distance(X)
 threshold = np.percentile(distances, 97.5)
 outliers = distances > threshold
 
-st.markdown(f"**Outliers Identificados:** {sum(outliers)} ({(sum(outliers)/len(df)*100):.1f}%)")
+st.markdown(f"**Outliers Identificados:** {sum(outliers)} ({(sum(outliers)/len(df_filtered)*100):.1f}%)")
 
 # Visualização dos outliers
 fig_outliers = px.scatter(
-    df,
+    df_filtered,
     x='VolumeMediaMensal',
     y='TaxaMediaPonderada',
     color=outliers,
@@ -819,8 +819,8 @@ st.plotly_chart(fig_outliers, use_container_width=True)
 st.markdown("### 3. Análise de Dependência (Copula)")
 
 # Transformação para ranks uniformes
-u1 = stats.rankdata(df['VolumeMediaMensal']) / (len(df) + 1)
-u2 = stats.rankdata(df['TaxaMediaPonderada']) / (len(df) + 1)
+u1 = stats.rankdata(df_filtered['VolumeMediaMensal']) / (len(df_filtered) + 1)
+u2 = stats.rankdata(df_filtered['TaxaMediaPonderada']) / (len(df_filtered) + 1)
 
 fig_copula = px.scatter(
     x=u1, 
@@ -834,7 +834,7 @@ st.plotly_chart(fig_copula, use_container_width=True)
 st.markdown("## 🤖 Modelos de Machine Learning")
 
 # Preparação dos dados
-X = df[['VolumeMediaMensal', 'TaxaMediaPonderada']]
+X = df_filtered[['VolumeMediaMensal', 'TaxaMediaPonderada']]
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
@@ -851,7 +851,7 @@ linkage_matrix = linkage(X_scaled, method='ward')
 
 # Aplicar clustering
 hc = AgglomerativeClustering(n_clusters=n_clusters)
-df['Cluster_Hierarquico'] = hc.fit_predict(X_scaled)
+df_filtered['Cluster_Hierarquico'] = hc.fit_predict(X_scaled)
 
 # 2. Análise de Componentes Principais (PCA)
 st.markdown("### 2. Análise de Componentes Principais")
@@ -871,11 +871,11 @@ st.markdown("### 3. Detecção de Anomalias (Isolation Forest)")
 from sklearn.ensemble import IsolationForest
 iso_forest = IsolationForest(contamination=0.1, random_state=42)
 anomalies = iso_forest.fit_predict(X_scaled)
-df['Is_Anomaly'] = anomalies == -1
+df_filtered['Is_Anomaly'] = anomalies == -1
 
 # Visualização das anomalias
 fig_anomalies = px.scatter(
-    df,
+    df_filtered,
     x='VolumeMediaMensal',
     y='TaxaMediaPonderada',
     color='Is_Anomaly',
@@ -891,8 +891,8 @@ st.markdown("### 4. Análise de Tendências e Padrões")
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import make_pipeline
 
-X_vol = df['VolumeMediaMensal'].values.reshape(-1, 1)
-y_taxa = df['TaxaMediaPonderada'].values
+X_vol = df_filtered['VolumeMediaMensal'].values.reshape(-1, 1)
+y_taxa = df_filtered['TaxaMediaPonderada'].values
 
 degree = st.slider("Grau do Polinômio", 1, 5, 2)
 polyreg = make_pipeline(PolynomialFeatures(degree), LinearRegression())
@@ -903,7 +903,7 @@ X_plot = np.linspace(X_vol.min(), X_vol.max(), 100).reshape(-1, 1)
 y_plot = polyreg.predict(X_plot)
 
 fig_trend = go.Figure()
-fig_trend.add_trace(go.Scatter(x=df['VolumeMediaMensal'], y=df['TaxaMediaPonderada'], 
+fig_trend.add_trace(go.Scatter(x=df_filtered['VolumeMediaMensal'], y=df_filtered['TaxaMediaPonderada'], 
                               mode='markers', name='Dados Reais'))
 fig_trend.add_trace(go.Scatter(x=X_plot.ravel(), y=y_plot, name='Tendência Polinomial'))
 fig_trend.update_layout(title='Análise de Tendência Volume-Taxa')
@@ -931,9 +931,9 @@ if 'df' not in st.session_state:
 st.markdown("### 📊 Análise de Conversão")
 
 # Calcular métricas de conversão
-df['VolumeConvertido'] = df['VolumeMediaMensal'] * conversion_rate
-total_volume_original = df['VolumeMediaMensal'].sum()
-total_volume_convertido = df['VolumeConvertido'].sum()
+df_filtered['VolumeConvertido'] = df_filtered['VolumeMediaMensal'] * conversion_rate
+total_volume_original = df_filtered['VolumeMediaMensal'].sum()
+total_volume_convertido = df_filtered['VolumeConvertido'].sum()
 
 # Métricas principais de conversão
 col1, col2, col3 = st.columns(3)
@@ -964,7 +964,7 @@ with col3:
 # Análise por banda
 st.markdown("#### Análise de Conversão por Banda")
 
-conversao_banda = df.groupby('BandaCliente').agg({
+conversao_banda = df_filtered.groupby('BandaCliente').agg({
     'VolumeMediaMensal': 'sum',
     'VolumeConvertido': 'sum',
     'BandaCliente': 'count'
@@ -1066,9 +1066,9 @@ with col1:
     - Volume médio por cliente após: R$ {:.2f}
     - Diferença média por cliente: R$ {:.2f}
     """.format(
-        df['VolumeMediaMensal'].mean(),
-        df['VolumeConvertido'].mean(),
-        df['VolumeConvertido'].mean() - df['VolumeMediaMensal'].mean()
+        df_filtered['VolumeMediaMensal'].mean(),
+        df_filtered['VolumeConvertido'].mean(),
+        df_filtered['VolumeConvertido'].mean() - df_filtered['VolumeMediaMensal'].mean()
     ))
 
 with col2:
@@ -1078,9 +1078,9 @@ with col2:
     - Menor impacto absoluto: R$ {:.2f}
     - Desvio padrão do impacto: R$ {:.2f}
     """.format(
-        (df['VolumeConvertido'] - df['VolumeMediaMensal']).max(),
-        (df['VolumeConvertido'] - df['VolumeMediaMensal']).min(),
-        (df['VolumeConvertido'] - df['VolumeMediaMensal']).std()
+        (df_filtered['VolumeConvertido'] - df_filtered['VolumeMediaMensal']).max(),
+        (df_filtered['VolumeConvertido'] - df_filtered['VolumeMediaMensal']).min(),
+        (df_filtered['VolumeConvertido'] - df_filtered['VolumeMediaMensal']).std()
     ))
 
 # Adicionar botão para download dos dados de conversão
@@ -1110,21 +1110,21 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric(
         "Volume Total",
-        f"R$ {df['VolumeMediaMensal'].sum():,.2f}",
+        f"R$ {df_filtered['VolumeMediaMensal'].sum():,.2f}",
         help="Volume mensal total da carteira"
     )
 
 with col2:
     st.metric(
         "Taxa Média",
-        f"{df['TaxaMediaPonderada'].mean():.2%}",
+        f"{df_filtered['TaxaMediaPonderada'].mean():.2%}",
         help="Taxa média ponderada da carteira"
     )
 
 with col3:
     st.metric(
         "Clientes",
-        f"{len(df):,}",
+        f"{len(df_filtered):,}",
         help="Número total de clientes"
     )
 
@@ -1160,7 +1160,7 @@ with col1:
     """.format(
         total_volume_convertido - total_volume_original,
         projecao_anual,
-        (df['VolumeConvertido'].mean() - df['VolumeMediaMensal'].mean()
+        (df_filtered['VolumeConvertido'].mean() - df_filtered['VolumeMediaMensal'].mean()
     )))
 with col2:
     st.info("""
@@ -1171,7 +1171,7 @@ with col2:
     """.format(
         top_10_volume,
         gini_volume,
-        df['VolumeMediaMensal'].std() / df['VolumeMediaMensal'].mean()
+        df_filtered['VolumeMediaMensal'].std() / df_filtered['VolumeMediaMensal'].mean()
     ))
 
 # 7. ANÁLISES AVANÇADAS
@@ -1188,7 +1188,7 @@ with tabs[0]:
     with col1:
         # Métricas dos clusters
         st.markdown("**Características dos Clusters**")
-        cluster_stats = df.groupby('Cluster').agg({
+        cluster_stats = df_filtered.groupby('Cluster').agg({
             'VolumeMediaMensal': ['mean', 'count'],
             'TaxaMediaPonderada': 'mean',
             'TicketMedio': 'mean'
@@ -1207,7 +1207,7 @@ with tabs[0]:
         # Distribuição dos clusters
         st.markdown("**Distribuição dos Segmentos**")
         fig_dist = px.pie(
-            df, 
+            df_filtered, 
             names='Cluster',
             title='Distribuição dos Clientes por Segmento'
         )
@@ -1216,7 +1216,7 @@ with tabs[0]:
     # Visualização 2D dos clusters
     st.markdown("**Visualização dos Segmentos**")
     fig_clusters = px.scatter(
-        df,
+        df_filtered,
         x='VolumeMediaMensal',
         y='TaxaMediaPonderada',
         color='Cluster',
@@ -1234,10 +1234,10 @@ with tabs[0]:
     st.markdown("**Análise Detalhada dos Segmentos**")
     selected_cluster = st.selectbox(
         "Selecione um segmento para análise detalhada",
-        sorted(df['Cluster'].unique())
+        sorted(df_filtered['Cluster'].unique())
     )
     
-    cluster_detail = df[df['Cluster'] == selected_cluster]
+    cluster_detail = df_filtered[df_filtered['Cluster'] == selected_cluster]
     
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -1258,11 +1258,143 @@ with tabs[0]:
 
 with tabs[1]:
     # (Manter análises estatísticas)
-    st.markdown("#### Métricas Estatísticas")
+    st.markdown("### 📊 Análise Estatística Detalhada")
     
+    # Estatísticas descritivas por banda
+    stats_df = df_filtered.groupby('BandaCliente').agg({
+        'VolumeMediaMensal': ['count', 'mean', 'std', 'min', 'max'],
+        'TaxaMediaPonderada': ['mean', 'std', 'min', 'max'],
+        'TicketMedio': ['mean', 'std']
+    }).round(4)
+    
+    # Renomear as colunas para melhor visualização
+    stats_df.columns = [
+        'Quantidade', 'Volume Médio', 'Desvio Volume', 'Volume Min', 'Volume Max',
+        'Taxa Média', 'Desvio Taxa', 'Taxa Min', 'Taxa Max',
+        'Ticket Médio', 'Desvio Ticket'
+    ]
+    
+    # Formatar os valores para exibição
+    st.dataframe(
+        stats_df.style.format({
+            'Volume Médio': 'R$ {:,.2f}',
+            'Desvio Volume': 'R$ {:,.2f}',
+            'Volume Min': 'R$ {:,.2f}',
+            'Volume Max': 'R$ {:,.2f}',
+            'Taxa Média': '{:.2%}',
+            'Desvio Taxa': '{:.2%}',
+            'Taxa Min': '{:.2%}',
+            'Taxa Max': '{:.2%}',
+            'Ticket Médio': 'R$ {:,.2f}',
+            'Desvio Ticket': 'R$ {:,.2f}'
+        })
+    )
+    
+    # Testes de normalidade
+    st.markdown("#### Testes de Normalidade")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**Volume Médio Mensal**")
+        shapiro_vol = stats.shapiro(df_filtered['VolumeMediaMensal'])
+        st.metric(
+            "Shapiro-Wilk p-value", 
+            f"{shapiro_vol.pvalue:.4f}",
+            help="Valores > 0.05 indicam distribuição normal"
+        )
+        
+    with col2:
+        st.markdown("**Taxa Média Ponderada**")
+        shapiro_taxa = stats.shapiro(df_filtered['TaxaMediaPonderada'])
+        st.metric(
+            "Shapiro-Wilk p-value", 
+            f"{shapiro_taxa.pvalue:.4f}",
+            help="Valores > 0.05 indicam distribuição normal"
+        )
+
 with tabs[2]:
-    # (Manter análises de correlação)
-    st.markdown("#### Correlações e Dependências")
+    st.markdown("### 🔄 Análise de Correlações")
+    
+    # Calcular matriz de correlação
+    corr_vars = ['VolumeMediaMensal', 'TaxaMediaPonderada', 'TicketMedio', 'NumeroOperacoes']
+    corr_matrix = df_filtered[corr_vars].corr()
+    
+    # Criar heatmap de correlação
+    fig_corr = go.Figure(data=go.Heatmap(
+        z=corr_matrix,
+        x=corr_vars,
+        y=corr_vars,
+        text=corr_matrix.round(3),
+        texttemplate='%{text}',
+        textfont={"size": 10},
+        hoverongaps=False,
+        colorscale='RdBu',
+        zmin=-1,
+        zmax=1
+    ))
+    
+    fig_corr.update_layout(
+        title='Matriz de Correlação',
+        height=500,
+        width=700
+    )
+    
+    st.plotly_chart(fig_corr, use_container_width=True)
+    
+    # Análise detalhada das correlações
+    st.markdown("#### Correlações Significativas")
+    
+    # Função para interpretar a correlação
+    def interpretar_correlacao(corr):
+        if abs(corr) < 0.3:
+            return "Fraca"
+        elif abs(corr) < 0.7:
+            return "Moderada"
+        else:
+            return "Forte"
+    
+    # Criar DataFrame com interpretações
+    correlacoes = []
+    for i in range(len(corr_vars)):
+        for j in range(i+1, len(corr_vars)):
+            corr = corr_matrix.iloc[i,j]
+            correlacoes.append({
+                'Variável 1': corr_vars[i],
+                'Variável 2': corr_vars[j],
+                'Correlação': corr,
+                'Intensidade': interpretar_correlacao(corr)
+            })
+    
+    corr_df = pd.DataFrame(correlacoes)
+    
+    # Exibir tabela de correlações
+    st.dataframe(
+        corr_df.style.format({
+            'Correlação': '{:.3f}'
+        }).background_gradient(
+            subset=['Correlação'],
+            cmap='RdBu',
+            vmin=-1,
+            vmax=1
+        )
+    )
+    
+    # Scatter plots para correlações mais relevantes
+    st.markdown("#### Visualização das Principais Correlações")
+    
+    # Encontrar a correlação mais forte
+    strongest_corr = corr_df.iloc[corr_df['Correlação'].abs().idxmax()]
+    
+    fig_scatter = px.scatter(
+        df_filtered,
+        x=strongest_corr['Variável 1'],
+        y=strongest_corr['Variável 2'],
+        color='BandaCliente',
+        title=f'Correlação entre {strongest_corr["Variável 1"]} e {strongest_corr["Variável 2"]}',
+        trendline="ols"
+    )
+    
+    st.plotly_chart(fig_scatter, use_container_width=True)
 
 # 8. SIMULAÇÕES E CENÁRIOS
 st.markdown("### 🎮 Simulador de Cenários")
@@ -1302,10 +1434,9 @@ st.markdown("""
         </ul>
     </div>
 """, unsafe_allow_html=True)
-
 # Calcular métricas de referência
-volume_medio_atual = df['VolumeMediaMensal'].mean()
-taxa_media_atual = df['TaxaMediaPonderada'].mean()
+volume_medio_atual = df_filtered['VolumeMediaMensal'].mean()
+taxa_media_atual = df_filtered['TaxaMediaPonderada'].mean()
 
 # Seção Otimizada de Análise de Abertura de Mercado
 st.markdown("""
@@ -1735,12 +1866,5 @@ with col2:
         )
     )
 
-# Download da projeção
-csv_projecao = projecao.to_csv(index=False).encode('utf-8')
-st.download_button(
-    label="📥 Download da Projeção 24 Meses",
-    data=csv_projecao,
-    file_name='projecao_24meses.csv',
-    mime='text/csv',
-    key='download_projecao'
-)
+
+
