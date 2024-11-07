@@ -29,118 +29,86 @@ st.set_page_config(
     page_icon="📊",
 )
 
-# Aplicar tema claro com regras CSS adicionais
+# Aplicar tema escuro
 st.markdown("""
     <style>
-        /* Reset geral para fundo branco */
+        /* Reset geral para fundo preto */
         .stApp {
-            background-color: white;
+            background-color: #0E1117;
         }
         
-        /* Tema claro */
+        /* Tema escuro */
         :root {
             --primary-color: #ff4b4b;
-            --background-color: white;
-            --secondary-background-color: #f0f2f6;
-            --text-color: #31333F;
+            --background-color: #0E1117;
+            --secondary-background-color: #262730;
+            --text-color: #FAFAFA;
             --font: "Source Sans Pro", sans-serif;
         }
 
-        /* Fundo branco para o corpo principal */
+        /* Fundo preto para o corpo principal */
         .main {
-            background-color: white !important;
+            background-color: #0E1117 !important;
         }
 
-        /* Fundo branco para a sidebar */
-        .css-1d391kg {
-            background-color: white !important;
-        }
-        
+        /* Fundo preto para a sidebar */
         [data-testid="stSidebar"] {
-            background-color: white !important;
+            background-color: #262730 !important;
         }
         
-        /* Remover gradiente de fundo */
-        section[data-testid="stSidebarContent"] {
-            background-image: none !important;
-            background-color: white !important;
+        /* Cores de texto */
+        .stMarkdown, .stText, .stTitle {
+            color: #FAFAFA !important;
         }
-
+        
+        h1, h2, h3, h4, h5, h6 {
+            color: #FAFAFA !important;
+        }
+        
+        label {
+            color: #FAFAFA !important;
+        }
+        
+        [data-testid="stMetricLabel"] {
+            color: #FAFAFA !important;
+        }
+        
         /* Ajuste de cores para widgets */
         .stSlider, .stSelectbox, .stMultiSelect {
-            background-color: white !important;
+            background-color: #262730 !important;
+            color: #FAFAFA !important;
         }
 
         /* Cores para cards e containers */
         div[data-testid="stMetricValue"] {
-            background-color: white !important;
-            color: #31333F !important;
+            background-color: #262730 !important;
+            color: #FAFAFA !important;
         }
 
         .metric-card {
-            background-color: white !important;
-            border: 1px solid #e1e4e8 !important;
-        }
-
-        /* Ajuste de cores para gráficos */
-        .js-plotly-plot {
-            background-color: white !important;
-        }
-        
-        /* Remover gradientes e backgrounds adicionais */
-        .stApp > header {
-            background-color: transparent !important;
-        }
-        
-        .stApp > div:first-child {
-            background-color: white !important;
-        }
-        
-        iframe {
-            background-color: white !important;
-        }
-        
-        /* Ajuste de cores de texto */
-        .stMarkdown, .stText, .stTitle {
-            color: #31333F !important;
-        }
-        
-        /* Ajuste de cores para headers */
-        h1, h2, h3, h4, h5, h6 {
-            color: #31333F !important;
-        }
-        
-        /* Ajuste de cores para labels */
-        label {
-            color: #31333F !important;
-        }
-        
-        /* Ajuste de cores para métricas */
-        [data-testid="stMetricLabel"] {
-            color: #31333F !important;
-        }
-        
-        /* Ajuste de cores para tooltips */
-        .tooltip {
-            color: #31333F !important;
-        }
-        
-        /* Ajuste de cores para selectbox e outros inputs */
-        .stSelectbox > div > div {
-            color: #31333F !important;
-        }
-        
-        /* Ajuste de cores para sidebar */
-        [data-testid="stSidebarNav"] {
-            color: #31333F !important;
-        }
-        
-        /* Ajuste de cores para botões */
-        .stButton > button {
-            color: #31333F !important;
+            background-color: #262730 !important;
+            border: 1px solid #4A4A4A !important;
         }
     </style>
 """, unsafe_allow_html=True)
+
+# Configuração base para todos os gráficos Plotly
+layout_config = {
+    'plot_bgcolor': '#0E1117',
+    'paper_bgcolor': '#0E1117',
+    'font': {'color': '#FAFAFA'},
+    'xaxis': {
+        'gridcolor': '#262730',
+        'color': '#FAFAFA'
+    },
+    'yaxis': {
+        'gridcolor': '#262730',
+        'color': '#FAFAFA'
+    },
+    'legend': {
+        'font': {'color': '#FAFAFA'}
+    }
+}
 
 # Mover o upload do arquivo para antes do sidebar
 st.markdown('<div class="content-section">', unsafe_allow_html=True)
@@ -316,7 +284,8 @@ fig_dist.update_layout(
     xaxis_title='Taxa Média Ponderada',
     yaxis_title='Densidade',
     showlegend=True,
-    height=500
+    height=500,
+    **layout_config
 )
 
 st.plotly_chart(fig_dist, use_container_width=True)
@@ -327,7 +296,8 @@ fig_box = px.box(
     x='BandaCliente',
     y='TaxaMediaPonderada',
     title='Distribuição das Taxas por Banda (Box Plot)',
-    labels={'TaxaMediaPonderada': 'Taxa Média Ponderada', 'BandaCliente': 'Banda do Cliente'}
+    labels={'TaxaMediaPonderada': 'Taxa Média Ponderada', 'BandaCliente': 'Banda do Cliente'},
+    **layout_config
 )
 fig_box.add_hline(
     y=target_rate,
@@ -350,7 +320,8 @@ fig_scatter = px.scatter(
         'TaxaMediaPonderada': 'Taxa Média Ponderada',
         'BandaCliente': 'Banda do Cliente',
         'TicketMedio': 'Ticket Médio'
-    }
+    },
+    **layout_config
 )
 fig_scatter.add_hline(
     y=target_rate,
@@ -382,7 +353,8 @@ for col in volume_dist.columns:
 fig_vol.update_layout(
     title='Distribuição de Clientes por Volume e Taxa',
     barmode='stack',
-    height=500
+    height=500,
+    **layout_config
 )
 
 st.plotly_chart(fig_vol, use_container_width=True)
@@ -396,7 +368,8 @@ fig_pot = px.bar(
     x='BandaCliente',
     y='VolumeMediaMensal',
     title=f'Volume Mensal Potencial por Categoria (Taxa > {target_rate:.1%}, Conversão: {conversion_rate:.1%})',
-    labels={'BandaCliente': 'Banda do Cliente', 'VolumeMediaMensal': 'Volume Potencial (R$)'}
+    labels={'BandaCliente': 'Banda do Cliente', 'VolumeMediaMensal': 'Volume Potencial (R$)'},
+    **layout_config
 )
 
 st.plotly_chart(fig_pot, use_container_width=True)
@@ -1639,7 +1612,8 @@ with tab_projecao:
     
     fig_tempo.update_layout(
         title=f'Projeção {metrica_tempo} - {meses_projecao} Meses',
-        height=500
+        height=500,
+        **layout_config
     )
     
     st.plotly_chart(fig_tempo, use_container_width=True)
@@ -1713,8 +1687,9 @@ with tab_metas:
         ))
         
         fig_dist.update_layout(
-            title='Distribui��ão das Metas Mensais',
-            height=500
+            title='Distribuição das Metas Mensais',
+            height=500,
+            **layout_config
         )
         
         st.plotly_chart(fig_dist, use_container_width=True)
@@ -1758,7 +1733,8 @@ with tab_metas:
         fig_comp.update_layout(
             title='Comparativo de Metas',
             barmode='group',
-            height=500
+            height=500,
+            **layout_config
         )
         
         st.plotly_chart(fig_comp, use_container_width=True)
