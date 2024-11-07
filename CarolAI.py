@@ -203,11 +203,12 @@ def generate_advanced_recommendations(basket_sets, transactions, unique_items, m
                                   max_len=3)  # Limitar tamanho máximo para melhor performance
         
         if len(frequent_itemsets) > 0:
-            # Gerar regras de associação
+            # Gerar regras de associação com o novo parâmetro num_itemsets
             rules = association_rules(
                 frequent_itemsets,
                 metric="confidence",
-                min_threshold=min_confidence
+                min_threshold=min_confidence,
+                num_itemsets=len(frequent_itemsets)  # Adicionando o novo parâmetro obrigatório
             )
             
             if len(rules) > 0:
@@ -224,8 +225,8 @@ def generate_advanced_recommendations(basket_sets, transactions, unique_items, m
     except Exception as e:
         st.error(f"Erro ao gerar recomendações: {str(e)}")
         return pd.DataFrame()
-
 @st.cache_data(ttl=3600)
+
 def create_network_visualization(rules, max_rules=50):
     """Cria visualização em rede otimizada"""
     try:
