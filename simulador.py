@@ -1165,7 +1165,7 @@ with col1:
         total_volume_convertido - total_volume_original,
         projecao_anual,
         (df_filtered['VolumeConvertido'].mean() - df_filtered['VolumeMediaMensal'].mean()
-    ))
+    )))
 with col2:
     st.info("""
     **Análise de Concentração**
