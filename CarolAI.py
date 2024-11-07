@@ -131,12 +131,33 @@ def analyze_product_segments(basket_sets, product_metrics):
         segments['media_outros_norm'] * 0.2
     )
     
-    # Categorização
-    segments['categoria'] = pd.qcut(
-        segments['score_composto'],
-        q=4,
-        labels=['Baixo Desempenho', 'Desempenho Regular', 'Alto Desempenho', 'Produto Estrela']
-    )
+    # Categorização com tratamento para valores duplicados
+    try:
+        # Primeiro tenta usar qcut com tratamento de duplicatas
+        segments['categoria'] = pd.qcut(
+            segments['score_composto'],
+            q=4,
+            labels=['Baixo Desempenho', 'Desempenho Regular', 'Alto Desempenho', 'Produto Estrela']
+        )
+    except ValueError:
+        # Se falhar, usa cut com bins calculados manualmente
+        unique_scores = sorted(segments['score_composto'].unique())
+        if len(unique_scores) < 4:
+            # Se houver menos de 4 valores únicos, atribui categorias manualmente
+            segments['categoria'] = pd.Categorical(
+                ['Baixo Desempenho'] * len(segments),
+                categories=['Baixo Desempenho', 'Desempenho Regular', 'Alto Desempenho', 'Produto Estrela']
+            )
+        else:
+            # Calcula os percentis manualmente
+            percentiles = np.percentile(unique_scores, [25, 50, 75])
+            bins = [-np.inf] + list(percentiles) + [np.inf]
+            segments['categoria'] = pd.cut(
+                segments['score_composto'],
+                bins=bins,
+                labels=['Baixo Desempenho', 'Desempenho Regular', 'Alto Desempenho', 'Produto Estrela'],
+                include_lowest=True
+            )
     
     return segments
 
