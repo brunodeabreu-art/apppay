@@ -501,15 +501,6 @@ st.dataframe(
     })
 )
 
-# Download button
-st.download_button(
-    label="Download da Análise Completa",
-    data=analysis_df.to_csv().encode('utf-8'),
-    file_name='analise_completa.csv',
-    mime='text/csv',
-    key='download_analise_1'
-)
-
 # Após as métricas de conversão existentes, adicionar nova seção
 st.markdown("<div class='section-divider'></div>", unsafe_allow_html=True)
 st.markdown("""
@@ -1106,16 +1097,6 @@ with col2:
         (df_filtered['VolumeConvertido'] - df_filtered['VolumeMediaMensal']).std()
     ))
 
-# Adicionar botão para download dos dados de conversão
-csv_conversao = conversao_detalhada.to_csv(index=False).encode('utf-8')
-st.download_button(
-    label="📥 Download da Análise de Conversão",
-    data=csv_conversao,
-    file_name='analise_conversao.csv',
-    mime='text/csv',
-    key='download_conversao_1'
-)
-
 # 1. VISÃO GERAL E CONTEXTO
 st.markdown("""
     <div style='background-color: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 2rem 0;'>
@@ -1184,7 +1165,7 @@ with col1:
         total_volume_convertido - total_volume_original,
         projecao_anual,
         (df_filtered['VolumeConvertido'].mean() - df_filtered['VolumeMediaMensal'].mean()
-    )))
+    ))
 with col2:
     st.info("""
     **Análise de Concentração**
@@ -1428,16 +1409,6 @@ st.markdown("### 📑 Documentação e Exportação")
 col1, col2 = st.columns(2)
 
 with col1:
-    # Botão de download da análise
-    st.download_button(
-        label="Download da Análise Completa",
-        data=analysis_df.to_csv().encode('utf-8'),
-        file_name='analise_completa.csv',
-        mime='text/csv',
-        key='download_analise_1'
-    )
-
-with col2:
     # Documentação e metodologia
     st.info("""
     **Metodologia**
@@ -1821,57 +1792,6 @@ with tab_metas:
         )
         
         st.plotly_chart(fig_comp, use_container_width=True)
-
-# Download dos dados
-col1, col2 = st.columns(2)
-with col1:
-    # Botão de download da análise
-    st.download_button(
-        label="Download da Análise Completa",
-        data=analysis_df.to_csv().encode('utf-8'),
-        file_name='analise_completa.csv',
-        mime='text/csv',
-        key='download_analise_1'
-    )
-
-with col2:
-    # Documentação e metodologia
-    st.info("""
-    **Metodologia**
-    - Taxa de conversão aplicada: {:.1%}
-    - Taxa alvo definida: {:.1%}
-    - Período de análise: Mensal
-    """.format(conversion_rate, target_rate))
-
-# Seção Otimizada de Análise de Abertura de Mercado
-st.markdown("""
-    <div style='background-color: #f8f9fa; padding: 1.5rem; border-radius: 8px; margin: 2rem 0;'>
-        <h2 style='color: #2E4057; margin-bottom: 1rem;'>Simulador de Expansão de Mercado</h2>
-        <p style='color: #666; font-size: 1.1rem;'>
-            Ferramenta avançada para simulação de cenários de expansão, projeções e análise de metas.
-        </p>
-    </div>
-""", unsafe_allow_html=True)
-
-# Download dos dados de simulação
-col1, col2 = st.columns(2)
-with col1:
-    st.download_button(
-        label="Download Simulação de Cenários",
-        data=simulacao_df.to_csv(index=False).encode('utf-8'),
-        file_name='simulacao_cenarios.csv',
-        mime='text/csv',
-        key='download_simulacao_2'
-    )
-
-with col2:
-    st.download_button(
-        label="Download Projeção Temporal",
-        data=projecao.to_csv(index=False).encode('utf-8'),
-        file_name='projecao_temporal.csv',
-        mime='text/csv',
-        key='download_projecao_3'
-    )
 
 # Seção de Análise de Crescimento
 st.markdown("#### 📈 Análise de Crescimento")
