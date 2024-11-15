@@ -1,487 +1,384 @@
 import streamlit as st
-from PIL import Image
-import requests
-from io import BytesIO
+import folium
+from folium import IFrame
+from streamlit_folium import st_folium
+import pandas as pd
+from openai import OpenAI
+import os
+from dotenv import load_dotenv
 
-# Configuração inicial com tema escuro e minimalista
+# Carregar variáveis de ambiente
+load_dotenv()
+
+# Inicializar cliente OpenAI
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+# Inicialização do estado da sessão
+if 'messages' not in st.session_state:
+    st.session_state.messages = []
+
+if 'output' not in st.session_state:
+    st.session_state.output = ''
+
+if 'error' not in st.session_state:
+    st.session_state.error = None
+
+# Configurar a página
 st.set_page_config(
-    page_title="Capivara Assessoria | Cultura, Tecnologia & Urbanismo",
+    page_title="São Francisco Explorer",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
-# CSS atualizado para landing page profissional
-st.markdown("""
-    <style>
-        /* Reset e variáveis */
-        :root {
-            --primary: #0A0A0A;
-            --secondary: #1E3329;
-            --accent: #FF4B36;
-            --text: #FFFFFF;
-            --spacing: 120px;
-        }
-
-        /* Estilos gerais */
-        .stApp {
-            background: var(--primary);
-            color: var(--text);
-        }
-
-        /* Hero Section */
-        .hero-section {
-            height: 90vh;
-            position: relative;
-            display: flex;
-            align-items: center;
-            margin: -80px -80px 0 -80px;
-            padding: 0 80px;
-        }
-
-        .hero-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.6;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-            max-width: 800px;
-        }
-
-        /* Grid de Notícias */
-        .news-grid {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: 2rem;
-            margin: var(--spacing) 0;
-        }
-
-        .news-main {
-            grid-column: span 8;
-            height: 600px;
-            position: relative;
-        }
-
-        .news-secondary {
-            grid-column: span 4;
-            height: 290px;
-            position: relative;
-        }
-
-        .news-card {
-            position: relative;
-            overflow: hidden;
-            border-radius: 8px;
-        }
-
-        .news-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.6s ease;
-        }
-
-        .news-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 2rem;
-            background: linear-gradient(transparent, rgba(0,0,0,0.9));
-            transform: translateY(20px);
-            opacity: 0;
-            transition: all 0.4s ease;
-        }
-
-        .news-card:hover .news-image {
-            transform: scale(1.05);
-        }
-
-        .news-card:hover .news-overlay {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        /* Seções */
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 300;
-            margin: var(--spacing) 0 3rem 0;
-            text-align: center;
-        }
-
-        /* Tags */
-        .tag {
-            background: var(--accent);
-            color: var(--text);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            display: inline-block;
-            margin-bottom: 1rem;
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-# Hero Section
-st.markdown("""
-    <div class="hero-section">
-        <img src="https://images.unsplash.com/photo-1573164713988-8665fc963095" 
-             class="hero-background" 
-             alt="Hero Background">
-        <div class="hero-content">
-            <h1 style="font-size: 4.5rem; font-weight: 300; margin-bottom: 2rem;">
-                Narrativas que Transformam
-            </h1>
-            <p style="font-size: 1.5rem; font-weight: 300; opacity: 0.8;">
-                Conectando histórias de inovação, cultura e urbanismo
-            </p>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
-
-# Destaques da Semana
-st.markdown('<h2 class="section-title">Destaques da Semana</h2>', unsafe_allow_html=True)
-
-st.markdown("""
-    <div class="news-grid">
-        <div class="news-main news-card">
-            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f" 
-                 class="news-image" 
-                 alt="Tech Hub">
-            <div class="news-overlay">
-                <span class="tag">Tecnologia</span>
-                <h3 style="font-size: 2rem; margin-bottom: 1rem;">
-                    Hub de Inovação na Periferia Forma 100 Desenvolvedores
-                </h3>
-                <p style="font-size: 1.1rem; opacity: 0.8;">
-                    Projeto revoluciona formação tech em comunidades
-                </p>
-            </div>
-        </div>
-        <div class="news-secondary news-card">
-            <img src="https://images.unsplash.com/photo-1531384441138-2736e62e0919" 
-                 class="news-image" 
-                 alt="Arte Urbana">
-            <div class="news-overlay">
-                <span class="tag">Cultura</span>
-                <h3>Festival Afro-Tech</h3>
-            </div>
-        </div>
-        <div class="news-secondary news-card">
-            <img src="https://images.unsplash.com/photo-1523450001312-faa4e2e37f0f" 
-                 class="news-image" 
-                 alt="Urbanismo">
-            <div class="news-overlay">
-                <span class="tag">Urbanismo</span>
-                <h3>Revitalização Comunitária</h3>
-            </div>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
-
-# Histórias em Destaque
-st.markdown('<h2 class="section-title">Histórias em Destaque</h2>', unsafe_allow_html=True)
-
-historias_destaque = [
-    {
-        "imagem": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e",
-        "tag": "Empreendedorismo",
-        "titulo": "Fintech Revoluciona Crédito na Periferia",
-        "texto": "Startup liderada por jovem empreendedora já impactou mais de 10 mil famílias"
+# Dados dos pontos turísticos
+pontos_turisticos = {
+    "Golden Gate Bridge": {
+        "lat": 37.8199,
+        "lon": -122.4783,
+        "desc": "Icônica ponte vermelha, símbolo da cidade",
+        "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/GoldenGateBridge-001.jpg/320px-GoldenGateBridge-001.jpg",
+        "categoria": ["dia", "pôr do sol"],
+        "horario": "24 horas",
+        "melhor_hora": "Nascer ou pôr do sol"
     },
-    {
-        "imagem": "https://images.unsplash.com/photo-1539701938214-0d9736e1c16b",
-        "tag": "Tecnologia",
-        "titulo": "Do Código à Comunidade",
-        "texto": "Escola de programação gratuita forma nova geração de desenvolvedores"
+    "Alcatraz": {
+        "lat": 37.8270,
+        "lon": -122.4230,
+        "desc": "Antiga prisão federal em uma ilha",
+        "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Alcatraz_Island_photo_D_Ramey_Logan.jpg/320px-Alcatraz_Island_photo_D_Ramey_Logan.jpg",
+        "categoria": ["dia"],
+        "horario": "09:00 - 16:30",
+        "melhor_hora": "Manhã"
     },
-    {
-        "imagem": "https://images.unsplash.com/photo-1524601500432-1e1a4c71d692",
-        "tag": "Cultura",
-        "titulo": "Arte que Transforma",
-        "texto": "Coletivo de artistas revitaliza espaços abandonados com tecnologia"
+    "Fisherman's Wharf": {
+        "lat": 37.8080,
+        "lon": -122.4177,
+        "desc": "Área histórica à beira-mar com restaurantes e lojas",
+        "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Fishermans_Wharf_Sign.jpg/320px-Fishermans_Wharf_Sign.jpg",
+        "categoria": ["dia", "noite"],
+        "horario": "10:00 - 22:00",
+        "melhor_hora": "Tarde"
+    },
+    "Lombard Street": {
+        "lat": 37.8021,
+        "lon": -122.4187,
+        "desc": "Famosa rua sinuosa com oito curvas",
+        "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Lombard_Street_SF.jpg/320px-Lombard_Street_SF.jpg",
+        "categoria": ["dia"],
+        "horario": "24 horas",
+        "melhor_hora": "Manhã"
+    },
+    "Chinatown": {
+        "lat": 37.7941,
+        "lon": -122.4078,
+        "desc": "Maior Chinatown fora da Ásia",
+        "img": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/SF_Chinatown_Dragon_Gate.jpg/320px-SF_Chinatown_Dragon_Gate.jpg",
+        "categoria": ["dia", "noite"],
+        "horario": "10:00 - 21:00",
+        "melhor_hora": "Tarde"
     }
-]
+}
 
-# Grid de histórias
-cols = st.columns(3)
-for idx, historia in enumerate(historias_destaque):
-    with cols[idx]:
-        st.markdown(f"""
-            <div style="margin-bottom: 2rem;">
-                <img src="{historia['imagem']}" 
-                     style="width: 100%; height: 300px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem;">
-                <span class="tag">{historia['tag']}</span>
-                <h3 style="font-size: 1.5rem; margin: 1rem 0;">{historia['titulo']}</h3>
-                <p style="opacity: 0.8;">{historia['texto']}</p>
-            </div>
-        """, unsafe_allow_html=True)
-
-# Nova seção: Cases de Sucesso com Slider Interativo
-st.markdown("""
-    <div class="cases-section">
-        <h2 class="section-title">Cases de Sucesso</h2>
-        <div class="cases-slider">
-            <div class="case-card active">
-                <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e" alt="Case 1">
-                <div class="case-content">
-                    <span class="tag">Tech</span>
-                    <h3>AfroHub</h3>
-                    <p>+300% de visibilidade na mídia</p>
-                    <div class="metrics">
-                        <div class="metric">
-                            <span class="number">150</span>
-                            <span class="label">Matérias</span>
-                        </div>
-                        <div class="metric">
-                            <span class="number">2M</span>
-                            <span class="label">Alcance</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Adicione mais cases aqui -->
-        </div>
-    </div>
-""", unsafe_allow_html=True)
-
-# Seção: Áreas de Atuação com Hover Effects
-areas_atuacao = [
-    {
-        "icone": "🎨",
-        "titulo": "Cultura",
-        "descricao": "Festivais, exposições e eventos culturais"
+# Remover o mapeamento antigo e usar diretamente as chaves
+roteiros = {
+    "2 dias": {
+        "Dia 1": {
+            "Manhã": ["Golden Gate Bridge", "Presidio"],
+            "Tarde": ["Fisherman's Wharf", "Pier 39"],
+            "Noite": ["Ghirardelli Square", "North Beach"]
+        },
+        "Dia 2": {
+            "Manhã": ["Alcatraz"],
+            "Tarde": ["Chinatown", "Union Square"],
+            "Noite": ["Nob Hill", "Top of the Mark"]
+        }
     },
-    {
-        "icone": "💻",
-        "titulo": "Tecnologia",
-        "descricao": "Startups, inovação e transformação digital"
+    "7 dias": {
+        "Dia 1": {
+            "Manhã": ["Golden Gate Bridge"],
+            "Tarde": ["Presidio", "Palace of Fine Arts"],
+            "Noite": ["Marina District"]
+        },
+        "Dia 2": {
+            "Manhã": ["Alcatraz"],
+            "Tarde": ["Fisherman's Wharf", "Pier 39"],
+            "Noite": ["Ghirardelli Square"]
+        },
+        "Dia 3": {
+            "Manhã": ["Chinatown"],
+            "Tarde": ["Union Square", "SoMa"],
+            "Noite": ["North Beach"]
+        },
+        "Dia 4": {
+            "Manhã": ["Golden Gate Park"],
+            "Tarde": ["California Academy of Sciences"],
+            "Noite": ["Haight-Ashbury"]
+        },
+        "Dia 5": {
+            "Manhã": ["Twin Peaks"],
+            "Tarde": ["Mission District"],
+            "Noite": ["Castro District"]
+        },
+        "Dia 6": {
+            "Manhã": ["Muir Woods"],
+            "Tarde": ["Sausalito"],
+            "Noite": ["Tiburon"]
+        },
+        "Dia 7": {
+            "Manhã": ["Lombard Street"],
+            "Tarde": ["Coit Tower"],
+            "Noite": ["Top of the Mark"]
+        }
     },
-    {
-        "icone": "🏙️",
-        "titulo": "Urbanismo",
-        "descricao": "Projetos urbanos e desenvolvimento social"
+    "14 dias": {
+        "Dia 1": {
+            "Manhã": ["Golden Gate Bridge"],
+            "Tarde": ["Presidio"],
+            "Noite": ["Marina District"]
+        }
     },
-    {
-        "icone": "🌱",
-        "titulo": "Sustentabilidade",
-        "descricao": "Iniciativas verdes e impacto social"
+    "20 dias": {
+        "Dia 1": {
+            "Manhã": ["Golden Gate Bridge"],
+            "Tarde": ["Presidio"],
+            "Noite": ["Marina District"]
+        }
     }
-]
+}
 
+# Função para obter o roteiro baseado na duração
+def get_roteiro(duracao):
+    return roteiros[duracao]
+
+# Função para criar o mapa interativo
+def criar_mapa():
+    m = folium.Map(
+        location=[37.7749, -122.4194],
+        zoom_start=13,
+        tiles="CartoDB positron"
+    )
+    
+    for nome, info in pontos_turisticos.items():
+        html = f"""
+            <div style="width:300px">
+                <h4>{nome}</h4>
+                <img src="{info['img']}" width="100%">
+                <p>{info['desc']}</p>
+            </div>
+        """
+        iframe = IFrame(html=html, width=320, height=280)
+        popup = folium.Popup(iframe)
+        
+        folium.Marker(
+            [info['lat'], info['lon']],
+            popup=popup,
+            tooltip=nome,
+            icon=folium.Icon(color='red', icon='info-sign')
+        ).add_to(m)
+    
+    return m
+
+# Função para o assistente virtual
+def get_assistant_response(prompt):
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Você é um guia turístico especialista em São Francisco, conhecendo profundamente todos os pontos turísticos, história e cultura da cidade."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=500
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f"Erro ao processar sua pergunta: {str(e)}"
+
+# Estilo personalizado
 st.markdown("""
-    <div class="areas-section">
-        <h2 class="section-title">Áreas de Atuação</h2>
-        <div class="areas-grid">
+<style>
+    .main {
+        padding: 0rem 1rem;
+    }
+    .block-container {
+        padding-top: 2rem;
+    }
+    .css-1d391kg {
+        padding: 1rem 1rem;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: #f0f2f6;
+        padding: 10px;
+        border-radius: 10px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        white-space: pre-wrap;
+        background-color: white;
+        border-radius: 5px;
+        color: #0f52ba;
+        font-weight: 500;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #0f52ba !important;
+        color: white !important;
+    }
+    .chat-container {
+        border: 1px solid #e6e6e6;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .info-box {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+</style>
 """, unsafe_allow_html=True)
 
-for area in areas_atuacao:
-    st.markdown(f"""
-        <div class="area-card">
-            <div class="area-icon">{area['icone']}</div>
-            <h3>{area['titulo']}</h3>
-            <p>{area['descricao']}</p>
-            <div class="area-hover">
-                <ul>
-                    <li>Assessoria de Imprensa</li>
-                    <li>Gestão de Redes Sociais</li>
-                    <li>Produção de Conteúdo</li>
-                    <li>Relações Públicas</li>
-                </ul>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+# Interface principal
+st.title("🌉 São Francisco Explorer")
 
-# Seção: Timeline de Projetos
-st.markdown("""
-    <div class="timeline-section">
-        <h2 class="section-title">Nossa Trajetória</h2>
-        <div class="timeline">
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <h3>2024</h3>
-                    <p>Lançamento do maior hub de inovação da América Latina</p>
-                </div>
-            </div>
-            <!-- Adicione mais itens na timeline -->
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+# Layout principal com três colunas
+col_mapa, col_chat, col_info = st.columns([2, 1, 1])
 
-# Seção: Números e Impacto com Contador Animado
-st.markdown("""
-    <div class="impact-section">
-        <h2 class="section-title">Nosso Impacto</h2>
-        <div class="impact-grid">
-            <div class="impact-card">
-                <span class="counter">500+</span>
-                <p>Matérias publicadas</p>
-            </div>
-            <div class="impact-card">
-                <span class="counter">50M+</span>
-                <p>Alcance total</p>
-            </div>
-            <div class="impact-card">
-                <span class="counter">100+</span>
-                <p>Clientes atendidos</p>
-            </div>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+with col_mapa:
+    st.subheader("Mapa Interativo")
+    mapa = criar_mapa()
+    st_folium(mapa, width=800, height=500)
 
-# CSS adicional para as novas seções
-st.markdown("""
-    <style>
-        /* Cases Slider */
-        .cases-slider {
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            display: flex;
-            gap: 2rem;
-            padding: 2rem 0;
-        }
+with col_chat:
+    st.subheader("💬 Assistente Virtual")
+    with st.container():
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
 
-        .case-card {
-            flex: 0 0 400px;
-            scroll-snap-align: start;
-            background: var(--secondary);
-            border-radius: 12px;
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
+        # Chat container com scroll
+        chat_container = st.container()
+        with chat_container:
+            for message in st.session_state.messages[-5:]:  # Mostrar últimas 5 mensagens
+                with st.chat_message(message["role"]):
+                    st.markdown(message["content"])
 
-        .case-card:hover {
-            transform: translateY(-10px);
-        }
+        # Input do chat
+        if prompt := st.chat_input("Pergunte sobre São Francisco..."):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-        /* Áreas de Atuação */
-        .areas-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            padding: 2rem 0;
-        }
+            with st.chat_message("assistant"):
+                response = get_assistant_response(prompt)
+                st.markdown(response)
+            st.session_state.messages.append({"role": "assistant", "content": response})
 
-        .area-card {
-            position: relative;
-            background: var(--secondary);
-            padding: 2rem;
-            border-radius: 12px;
-            text-align: center;
-            overflow: hidden;
-        }
+with col_info:
+    st.subheader("ℹ️ Informações Rápidas")
+    with st.expander("🌤️ Clima Atual", expanded=True):
+        st.write("22°C - Ensolarado")
+        st.progress(0.7, "Condições para turismo: Ótimas")
+    
+    with st.expander("🎫 Ingressos Populares"):
+        st.write("- Alcatraz: $41.00")
+        st.write("- CityPASS: $76.00")
+        st.write("- Cable Car: $8.00")
 
-        .area-hover {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--accent);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
+# Tabs para conteúdo adicional
+tab1, tab2 = st.tabs(["📍 Roteiros Detalhados", "🌟 Atrações"])
 
-        .area-card:hover .area-hover {
-            opacity: 1;
-        }
+with tab1:
+    col_filtros, col_roteiro = st.columns([1, 3])
+    
+    with col_filtros:
+        duracao = st.selectbox(
+            "Duração da Viagem",
+            list(roteiros.keys())  # Usar diretamente as chaves do dicionário
+        )
+        
+        tipo_roteiro = st.multiselect(
+            "Tipo de Roteiro",
+            ["Turístico", "Cultural", "Gastronômico", "Noturno"],
+            default=["Turístico"]
+        )
+        
+        orcamento = st.slider(
+            "Orçamento Diário ($)",
+            50, 500, 200
+        )
 
-        /* Timeline */
-        .timeline {
-            position: relative;
-            padding: 2rem 0;
-        }
+    with col_roteiro:
+        try:
+            roteiro_selecionado = roteiros[duracao]  # Acessar diretamente o roteiro
+            
+            for dia, atividades in roteiro_selecionado.items():
+                with st.expander(f"📅 {dia}", expanded=True):
+                    cols = st.columns(3)
+                    for periodo, col in zip(["Manhã", "Tarde", "Noite"], cols):
+                        with col:
+                            st.markdown(f"**{periodo}**")
+                            for local in atividades[periodo]:
+                                info = pontos_turisticos.get(local, {})
+                                st.write(f"- {local}")
+                                if info:
+                                    st.image(info['img'], width=150)
+                                    st.caption(info['desc'])
+        except Exception as e:
+            st.error(f"Erro ao carregar roteiro: {str(e)}")
+            st.write("Por favor, tente novamente ou selecione outro roteiro.")
 
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            width: 2px;
-            height: 100%;
-            background: var(--accent);
-        }
+with tab2:
+    # Filtros para atrações
+    col_filtros_atracoes, col_lista_atracoes = st.columns([1, 3])
+    
+    with col_filtros_atracoes:
+        categoria = st.multiselect(
+            "Categorias",
+            ["Todos", "Dia", "Noite", "Família", "Cultura", "Natureza"],
+            default=["Todos"]
+        )
+        
+        preco = st.select_slider(
+            "Faixa de Preço",
+            options=["$", "$$", "$$$", "$$$$"],
+            value="$$"
+        )
 
-        .timeline-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 2rem 0;
-        }
+    with col_lista_atracoes:
+        for nome, info in pontos_turisticos.items():
+            if "Todos" in categoria or any(cat.lower() in [c.lower() for c in categoria] for cat in info.get('categoria', [])):
+                with st.container():
+                    col_img, col_desc = st.columns([1, 2])
+                    with col_img:
+                        st.image(info.get('img', ''), width=200)
+                    with col_desc:
+                        st.subheader(nome)
+                        st.write(info.get('desc', ''))
+                        st.write(f"🕒 Horário: {info.get('horario', 'Não informado')}")
+                        st.write(f"✨ Melhor momento: {info.get('melhor_hora', 'Não informado')}")
+                st.divider()
 
-        /* Impacto */
-        .impact-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
-            padding: 2rem 0;
-        }
-
-        .impact-card {
-            text-align: center;
-            padding: 2rem;
-            background: var(--secondary);
-            border-radius: 12px;
-        }
-
-        .counter {
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        /* Animações */
-        @keyframes countUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .counter {
-            animation: countUp 2s ease-out forwards;
-        }
-
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .impact-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .timeline::before {
-                left: 0;
-            }
-
-            .timeline-item {
-                flex-direction: column;
-            }
-        }
-    </style>
-
-    <script>
-        // Animação dos contadores
-        const counters = document.querySelectorAll('.counter');
-        const options = {
-            threshold: 1,
-            rootMargin: "0px"
-        };
-
-        const observer = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, options);
-
-        counters.forEach(counter => observer.observe(counter));
-    </script>
-""", unsafe_allow_html=True) 
+# Sidebar atualizado
+with st.sidebar:
+    st.header("📱 Menu Rápido")
+    
+    # Clima
+    st.subheader("🌤️ Previsão 5 dias")
+    for i in range(5):
+        st.write(f"Dia {i+1}: 18°C - 22°C")
+    
+    # Transportes
+    st.subheader("🚌 Transporte")
+    opcoes_transporte = {
+        "BART": "Sistema de metrô rápido",
+        "Muni": "Ônibus e bondes locais",
+        "Cable Cars": "Bondes históricos"
+    }
+    for tipo, desc in opcoes_transporte.items():
+        with st.expander(tipo):
+            st.write(desc)
+    
+    # Dicas
+    st.subheader("💡 Dicas do Dia")
+    st.info("Hoje é ótimo para visitar Alcatraz! Reserve com antecedência.")
