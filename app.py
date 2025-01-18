@@ -320,7 +320,7 @@ def main():
                                 
                                 if post_data['imagem']:
                                     st.image(post_data['imagem'], 
-                                           use_column_width=True,
+                                           use_container_width=True,
                                            output_format="PNG")
                                 
                                 conteudo_formatado = post_data['conteudo'].replace('\n', '<br/>')
