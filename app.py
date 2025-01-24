@@ -13,7 +13,6 @@ from scipy import stats  # Para análises estatísticas
 import plotly.figure_factory as ff  # Para visualizações avançadas
 import networkx as nx  # Para análise de rede/dependências
 from textblob import TextBlob  # Para análise de sentimento
-import pycaret.regression as pcr  # Para AutoML
 import altair as alt
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, HoverTool
