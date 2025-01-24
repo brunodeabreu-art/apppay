@@ -13,6 +13,7 @@ from scipy import stats  # Para análises estatísticas
 import plotly.figure_factory as ff  # Para visualizações avançadas
 import networkx as nx  # Para análise de rede/dependências
 from textblob import TextBlob  # Para análise de sentimento
+import pycaret.regression as pcr  # Para AutoML
 import altair as alt
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, HoverTool
@@ -125,13 +126,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Cores personalizadas para gráficos
+# Cores personalizadas para gráficos (nova paleta mais sóbria)
 CUSTOM_COLORS = {
-    'primary': '#1e3d59',
-    'secondary': '#2b5876',
-    'tertiary': '#4682B4',
-    'quaternary': '#87CEEB',
-    'quinary': '#B0E0E6'
+    'primary': '#2C3E50',    # Azul escuro
+    'secondary': '#34495E',  # Azul acinzentado
+    'tertiary': '#7F8C8D',  # Cinza
+    'quaternary': '#95A5A6', # Cinza claro
+    'quinary': '#BDC3C7'    # Cinza muito claro
 }
 
 # Configurações de tema para gráficos Plotly
@@ -139,10 +140,10 @@ PLOTLY_THEME = {
     'layout': {
         'plot_bgcolor': 'rgba(0,0,0,0)',
         'paper_bgcolor': 'rgba(0,0,0,0)',
-        'font': {'color': '#1e3d59'},
-        'title': {'font': {'size': 24, 'color': '#1e3d59'}},
+        'font': {'color': '#2C3E50'},
+        'title': {'font': {'size': 24, 'color': '#2C3E50'}},
         'margin': {'t': 40, 'b': 40, 'l': 40, 'r': 40},
-        'colorway': ['#1e3d59', '#2b5876', '#4682B4', '#87CEEB', '#B0E0E6']
+        'colorway': ['#2C3E50', '#34495E', '#7F8C8D', '#95A5A6', '#BDC3C7']
     }
 }
 
@@ -252,7 +253,16 @@ def gerar_analise_departamental(df):
 
 def update_fig_layout(fig):
     """Atualiza o layout do gráfico com o tema padrão"""
-    fig.update_layout(**PLOTLY_THEME['layout'])
+    fig.update_layout(
+        **PLOTLY_THEME['layout'],
+        coloraxis_colorscale=[
+            [0, '#2C3E50'],    # Mais escuro
+            [0.25, '#34495E'],
+            [0.5, '#7F8C8D'],
+            [0.75, '#95A5A6'],
+            [1, '#BDC3C7']     # Mais claro
+        ]
+    )
     return fig
 
 def criar_matriz_riscos(df):
@@ -265,9 +275,9 @@ def criar_matriz_riscos(df):
         hover_data=['nome', 'progresso', 'gasto'],
         title='Matriz de Riscos e Complexidade',
         color_discrete_map={
-            'Alto': CUSTOM_COLORS['primary'],
-            'Médio': CUSTOM_COLORS['secondary'],
-            'Baixo': CUSTOM_COLORS['tertiary']
+            'Alto': '#2C3E50',
+            'Médio': '#7F8C8D',
+            'Baixo': '#BDC3C7'
         }
     )
     return update_fig_layout(fig)
@@ -2894,7 +2904,8 @@ def render_visualizacoes_interativas(df):
             x='departamento',
             y=metric,
             color='departamento',
-            title=f'{metric.replace("_", " ").title()} por Departamento'
+            title=f'{metric.replace("_", " ").title()} por Departamento',
+            color_discrete_sequence=['#2C3E50', '#34495E', '#7F8C8D', '#95A5A6', '#BDC3C7']
         )
         
         # Adicionar média como linha
@@ -2939,7 +2950,12 @@ def render_visualizacoes_interativas(df):
             corr_matrix,
             text=np.round(corr_matrix, 2),
             aspect='auto',
-            title='Matriz de Correlações'
+            title='Matriz de Correlações',
+            color_continuous_scale=[
+                [0, '#2C3E50'],
+                [0.5, '#7F8C8D'],
+                [1, '#BDC3C7']
+            ]
         )
         
     else:  # Distribuiões
