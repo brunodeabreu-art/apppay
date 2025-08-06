@@ -1,0 +1,53 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: apppay
+  description: AppPay - Python-based payment processing application
+  annotations:
+    github.com/project-slug: brunodeabreu-art/apppay
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - payment
+    - python
+    - fintech
+    - amigotech
+  links:
+    - url: https://github.com/brunodeabreu-art/apppay
+      title: Repository
+      icon: github
+spec:
+  type: service
+  lifecycle: production
+  owner: amigotech-dev
+  system: payment-platform
+  providesApis:
+    - apppay-api
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: apppay-api
+  description: AppPay Payment Processing API
+  annotations:
+    github.com/project-slug: brunodeabreu-art/apppay
+spec:
+  type: openapi
+  lifecycle: production
+  owner: amigotech-dev
+  system: payment-platform
+  definition: |
+    openapi: 3.0.0
+    info:
+      title: AppPay API
+      version: 1.0.0
+      description: Payment processing API for AppPay
+    paths:
+      /payments:
+        post:
+          summary: Process payment
+          description: Process a new payment transaction
+          responses:
+            '200':
+              description: Payment processed successfully
+            '400':
+              description: Invalid payment data
